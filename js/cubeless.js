@@ -373,7 +373,8 @@ var colors = {
 function fillSticker(x, y, colour) {
     if (!ctx) return;
     ctx.fillStyle = colour;
-    ctx.fillRect(stickerSize * x, stickerSize * y, stickerSize, stickerSize);
+    // Overlap slightly to prevent sub-pixel gaps showing background
+    ctx.fillRect(stickerSize * x, stickerSize * y, stickerSize + 0.5, stickerSize + 0.5);
 }
 
 function fillWithIndex(x, y, face, index, cubeArray) {
