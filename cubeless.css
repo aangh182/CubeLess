@@ -180,11 +180,11 @@ canvas {
 
 .grid-btn {
     aspect-ratio: unset; /* Allow buttons to stretch vertically if needed, or controlled by grid */
-    height: 60px; /* Fixed height for consistency */
+    height: 75px; /* Taller buttons */
     background-color: #333;
     border: 1px solid #444;
-    border-radius: 4px; /* Smaller radius for tighter look */
-    font-size: 18px;
+    border-radius: 6px; 
+    font-size: 22px; /* Larger text */
     color: #eee;
     cursor: pointer;
     display: flex;

@@ -621,13 +621,13 @@ document.addEventListener('DOMContentLoaded', function() {
         var headerHeight = document.querySelector('header').offsetHeight;
         var controlsHeight = document.querySelector('.controls-grid').offsetHeight;
         var availableHeight = window.innerHeight - headerHeight - controlsHeight - 40; // 40px padding/margin buffer
-        var availableWidth = window.innerWidth * 0.80;
+        var availableWidth = window.innerWidth * 0.70;
         
         // Desired Aspect Ratio: 5 width : 6 height
         // w / h = 5 / 6  => w = 5/6 * h
         
         // 1. Try limiting by width first
-        var newWidth = Math.min(availableWidth, 300); // Max width 300px
+        var newWidth = Math.min(availableWidth, 260); // Max width 260px
         var newHeight = newWidth * (6/5);
         
         // 2. If height is too big, limit by height
