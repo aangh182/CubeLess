@@ -1,0 +1,64 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CubeLess</title>
+    <link rel="stylesheet" href="cubeless.css">
+</head>
+<body>
+    <header>
+        <div class="header-buttons">
+            <button id="scramble-btn">SCRAMBLE</button>
+            <button id="solve-btn">SOLVE</button>
+        </div>
+        <div class="header-buttons">
+            <button id="solution-btn">SOLUTION</button>
+            <button id="record-btn">REC</button>
+        </div>
+    </header>
+
+    <!-- Solution History Modal -->
+    <div id="solution-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span id="close-modal" class="close">&times;</span>
+            <h2>Move History <button id="copy-btn" title="Copy to Clipboard">📋</button></h2>
+            <div id="move-history-list"></div>
+        </div>
+    </div>
+
+    <div class="cube-container">
+        <canvas id="cube-canvas" width="250" height="300"></canvas>
+    </div>
+
+    <div class="controls-grid">
+        <!-- Row 1 -->
+        <button class="grid-btn" data-move="x">x</button>
+        <button class="grid-btn" data-move="B'">B'</button>
+        <button class="grid-btn" data-move="B">B</button>
+        <button class="grid-btn" data-move="y">y</button>
+
+        <!-- Row 2 -->
+        <button class="grid-btn" data-move="L'">L'</button>
+        <button class="grid-btn" data-move="U'">U'</button>
+        <button class="grid-btn" data-move="U">U</button>
+        <button class="grid-btn" data-move="R">R</button>
+
+        <!-- Row 3 -->
+        <button class="grid-btn" data-move="L">L</button>
+        <button class="grid-btn" data-move="F'">F'</button>
+        <button class="grid-btn" data-move="F">F</button>
+        <button class="grid-btn" data-move="R'">R'</button>
+
+        <!-- Row 4 -->
+        <button class="grid-btn" data-move="y'">y'</button>
+        <button class="grid-btn" data-move="D">D</button>
+        <button class="grid-btn" data-move="D'">D'</button>
+        <button class="grid-btn" data-move="x'">x'</button>
+    </div>
+
+    <!-- Dependencies -->
+    <script src="js/cubeless.js"></script>
+</body>
+</html>

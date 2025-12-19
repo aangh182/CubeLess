@@ -1,0 +1,212 @@
+
+html {
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    touch-action: none; /* Prevent pinch zoom etc at root */
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: black;
+    color: white;
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    overscroll-behavior: none; /* Prevent scroll bounce */
+    touch-action: none;
+}
+
+header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 10px; /* Reduced side padding */
+    background-color: #222;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    flex-shrink: 0; /* Header doesn't shrink */
+    z-index: 10;
+}
+
+.header-buttons {
+    display: flex;
+    gap: 8px; /* Reduced gap */
+}
+
+h1 {
+    font-size: 20px; /* Slightly smaller for mobile */
+    margin: 0;
+    font-weight: normal;
+}
+
+/* Bigger touch targets for header buttons */
+#scramble-btn, #solve-btn, #solution-btn, #record-btn {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent; /* Reserve space for active state */
+    color: #ddd;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    padding: 10px 5px; 
+}
+
+#scramble-btn:active, #solve-btn:active, #solution-btn:active, #record-btn:active {
+    color: white;
+}
+
+#record-btn.recording {
+    color: #ff4444; /* Red color when recording */
+    border-bottom: 2px solid #ff4444; /* Visual indicator */
+}
+
+/* Modal styles - kept mostly same but ensuring full screen overlay */
+.modal {
+    position: fixed; 
+    z-index: 200; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(0,0,0,0.85); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    touch-action: auto; /* Allow scrolling inside modal */
+}
+
+.modal-content {
+    background-color: #222;
+    padding: 20px;
+    border: 1px solid #444;
+    width: 85%; /* Slightly smaller width percentage */
+    max-width: 320px; /* Reduced max-width to match compact theme */
+    max-height: 70%; /* Reduced max-height */
+    overflow-y: auto;
+    color: white;
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.modal-content h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Space between text and button */
+    margin-top: 0;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    position: absolute;
+    top: 5px;
+    right: 15px;
+    padding: 10px; /* larger touch area */
+}
+
+#move-history-list {
+    margin-top: 15px;
+    word-wrap: break-word; 
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-family: monospace;
+    font-size: 1.1em;
+    line-height: 1.4;
+}
+
+#copy-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.8em; /* Smaller icon */
+    padding: 5px;
+    display: flex; /* Ensure icon inside button is centered */
+    align-items: center;
+    filter: grayscale(100%);
+    transition: transform 0.1s;
+}
+
+#copy-btn:active {
+    transform: scale(0.9);
+}
+
+#copy-btn:hover {
+    filter: none;
+}
+
+.cube-container {
+    flex-grow: 1; /* Take up all available space */
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Center horizontally and vertically */
+    overflow: hidden;
+    width: 100%;
+    position: relative;
+}
+
+canvas {
+    /* Dimensions controlled by JS */
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.controls-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 4px; /* Tighten gap */
+    padding: 4px; /* Reduced padding */
+    width: 100%;
+    max-width: 100%; /* Fill entire width */
+    margin: 0;
+    box-sizing: border-box;
+    background-color: #111;
+    flex-shrink: 0;
+    padding-bottom: max(10px, env(safe-area-inset-bottom)); 
+}
+
+.grid-btn {
+    aspect-ratio: unset; /* Allow buttons to stretch vertically if needed, or controlled by grid */
+    height: 60px; /* Fixed height for consistency */
+    background-color: #333;
+    border: 1px solid #444;
+    border-radius: 4px; /* Smaller radius for tighter look */
+    font-size: 18px;
+    color: #eee;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    transition: background-color 0.1s;
+    touch-action: manipulation;
+}
+
+.grid-btn:active {
+    background-color: #555;
+    transform: scale(0.96); /* Feedback */
+}
+
+/* Mobile responsive adjustments - ensuring it fits even tiny screens */
+@media (max-height: 600px) {
+    .grid-btn {
+        font-size: 14px;
+        aspect-ratio: 1.5; /* flatter buttons on short screens */
+    }
+    h1 {
+        font-size: 16px;
+    }
+}
