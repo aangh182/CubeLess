@@ -466,10 +466,6 @@ function drawCube() {
     fillWithIndex(3, 5, "f", 9, cubeArray);
     fillWithIndex(4, 5, "r", 7, cubeArray);
     
-    // Draw outlines
-    // Hardcoded "thin-black" style for now
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "#000";
     
     // Outline blocks
     // Top block (U face + wings)
@@ -480,21 +476,47 @@ function drawCube() {
     // Since user wants "exactly like that", I should try to specific block outlines if possible, 
     // but simpler is to outline each sticker first, then maybe thick border around faces.
     
-    // Draw outline for every sticker
-    for(let x=0; x<5; x++) {
-        for(let y=0; y<6; y++) {
-             // Bỏ outline giữa viên thứ 3 và 4 (index 2 và 3) của cột 1 và cột cuối (x=0 và x=4)
-             // Merge indices y=2 and y=3 for x=0 and x=4
-             if ((x === 0 || x === 4) && y === 2) {
-                 ctx.strokeRect(stickerSize * x, stickerSize * y, stickerSize, stickerSize * 2);
-             } else if ((x === 0 || x === 4) && y === 3) {
-                 // Skip, handled by y=2
-                 continue;
-             } else {
-                 ctx.strokeRect(stickerSize * x, stickerSize * y, stickerSize, stickerSize);
-             }
+    // Draw outlines
+    // Style: Faded but visible
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(0, 0, 0, 1)";
+    
+    ctx.beginPath();
+
+    // Vertical Lines: Draw at x=0, 2, 3, 5. Skip 1 and 4 (inner edges of side cols).
+    // The grid width is 5 columns wide (0 to 5)
+    var vLines = [0, 2, 3, 5];
+    vLines.forEach(function(ix) {
+        var x = ix * stickerSize;
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, stickerSize * 6);
+    });
+
+    // Horizontal Lines:
+    // Columns are index 0, 1, 2, 3, 4.
+    // Middle columns (1, 2, 3) get all horizontal lines y=0..6
+    // Side columns (0, 4) get horizontal lines y=0..6 EXCEPT y=3 (merged cell)
+    for (var iy = 0; iy <= 6; iy++) {
+        var y = iy * stickerSize;
+        
+        // Col 0 (Left): Draw if not y=3
+        if (iy !== 3) {
+            ctx.moveTo(0, y);
+            ctx.lineTo(stickerSize, y);
+        }
+        
+        // Cols 1, 2, 3 (Middle): Always draw
+        ctx.moveTo(stickerSize, y);
+        ctx.lineTo(stickerSize * 4, y);
+        
+        // Col 4 (Right): Draw if not y=3
+        if (iy !== 3) {
+            ctx.moveTo(stickerSize * 4, y);
+            ctx.lineTo(stickerSize * 5, y);
         }
     }
+    
+    ctx.stroke();
     
     // Border around the whole thing?
     // ctx.strokeRect(0, 0, stickerSize * 5, stickerSize * 6);
