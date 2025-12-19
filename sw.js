@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cubeless-v1';
+const CACHE_NAME = 'cubeless-v2';
 const ASSETS = [
   './',
   './index.html',
