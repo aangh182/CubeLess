@@ -479,7 +479,7 @@ function drawCube() {
     // Draw outlines
     // Style: Faded but visible
     ctx.lineWidth = 1;
-    ctx.strokeStyle = "rgba(0, 0, 0, 1)";
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.4)";
     
     ctx.beginPath();
 
