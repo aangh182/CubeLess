@@ -49,19 +49,31 @@ h1 {
 }
 
 /* Bigger touch targets for header buttons */
-#scramble-btn, #solve-btn, #solution-btn, #record-btn {
+/* Icon buttons in header */
+.icon-btn {
     background: none;
     border: none;
-    border-bottom: 2px solid transparent; /* Reserve space for active state */
     color: #ddd;
-    font-size: 14px;
-    font-weight: bold;
     cursor: pointer;
-    text-transform: uppercase;
-    padding: 10px 5px; 
+    padding: 10px; 
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
 }
 
-#scramble-btn:active, #solve-btn:active, #solution-btn:active, #record-btn:active {
+.app-title {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.icon-btn:active {
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: scale(0.95);
     color: white;
 }
 
@@ -93,7 +105,14 @@ h1 {
 
 #record-btn.recording {
     color: #ff4444; /* Red color when recording */
-    border-bottom: 2px solid #ff4444; /* Visual indicator */
+    background-color: rgba(255, 68, 68, 0.15);
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(255, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
 }
 
 /* Modal styles - kept mostly same but ensuring full screen overlay */
