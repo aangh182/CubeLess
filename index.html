@@ -24,16 +24,17 @@
     <div id="solution-modal" class="modal" style="display: none;">
         <div class="modal-content">
             <span id="close-modal" class="close">&times;</span>
-            <h2>Move History <button id="copy-btn" title="Copy to Clipboard">📋</button></h2>
+            <h2>Solution <button id="copy-btn" title="Copy to Clipboard">📋</button></h2>
             <div id="move-history-list"></div>
         </div>
     </div>
 
     <div class="cube-container">
         <canvas id="cube-canvas" width="250" height="300"></canvas>
+        <button id="layout-btn" title="Switch Layout">⇄</button>
     </div>
 
-    <div class="controls-grid">
+    <div id="layout-main" class="controls-grid">
         <!-- Row 1 -->
         <button class="grid-btn" data-move="y'">y'</button>
         <button class="grid-btn" data-move="B'">B'</button>
@@ -57,6 +58,32 @@
         <button class="grid-btn" data-move="D">D</button>
         <button class="grid-btn" data-move="D'">D'</button>
         <button class="grid-btn" data-move="x">x</button>
+    </div>
+
+    <div id="layout-extra" class="controls-grid" style="display: none;">
+        <!-- Row 1 -->
+        <button class="grid-btn" data-move="y'">y'</button>
+        <button class="grid-btn" data-move="S'">S'</button>
+        <button class="grid-btn" data-move="S">S</button>
+        <button class="grid-btn" data-move="y">y</button>
+
+        <!-- Row 2 -->
+        <button class="grid-btn" data-move="l'">Lw'</button>
+        <button class="grid-btn" data-move="u'">Uw'</button>
+        <button class="grid-btn" data-move="u">Uw</button>
+        <button class="grid-btn" data-move="r">Rw</button>
+
+        <!-- Row 3 -->
+        <button class="grid-btn" data-move="l">Lw</button>
+        <button class="grid-btn" data-move="M">M</button>
+        <button class="grid-btn" data-move="M'">M'</button>
+        <button class="grid-btn" data-move="r'">Rw'</button>
+
+        <!-- Row 4 -->
+        <button class="grid-btn" data-move="z'">z'</button>
+        <button class="grid-btn" data-move="d">Dw</button>
+        <button class="grid-btn" data-move="d'">Dw'</button>
+        <button class="grid-btn" data-move="z">z</button>
     </div>
 
     <!-- Dependencies -->

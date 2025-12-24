@@ -65,6 +65,32 @@ h1 {
     color: white;
 }
 
+#layout-btn {
+    position: absolute;
+    bottom: 15px; /* Spacing from bottom of container */
+    right: 15px; /* Spacing from right */
+    background-color: rgba(50, 50, 50, 0.8);
+    color: white;
+    border: 1px solid #555;
+    border-radius: 50%; /* Circle */
+    width: 45px;
+    height: 45px;
+    font-size: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 50;
+    transition: background-color 0.2s, transform 0.1s;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#layout-btn:active {
+    background-color: rgba(80, 80, 80, 0.9);
+    transform: scale(0.95);
+}
+
 #record-btn.recording {
     color: #ff4444; /* Red color when recording */
     border-bottom: 2px solid #ff4444; /* Visual indicator */

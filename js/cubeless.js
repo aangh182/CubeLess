@@ -769,4 +769,28 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.addEventListener('touchstart', action, {passive: false});
         btn.addEventListener('click', action);
     });
+
+    // Layout Switch Button
+    var layoutBtn = document.getElementById("layout-btn");
+    var layoutMain = document.getElementById("layout-main");
+    var layoutExtra = document.getElementById("layout-extra");
+    
+    // Check if user has a preference stored (optional, but good UX)
+    // For now, default to main. 
+    
+    if (layoutBtn && layoutMain && layoutExtra) {
+        layoutBtn.addEventListener('click', function() {
+            if (layoutMain.style.display !== "none") {
+                // Switch to extra
+                layoutMain.style.display = "none";
+                layoutExtra.style.display = "grid";
+            } else {
+                // Switch to main
+                layoutMain.style.display = "grid";
+                layoutExtra.style.display = "none";
+            }
+            // Trigger resize to be safe, though grids should be same size
+            resizeAndDraw();
+        });
+    }
 });
