@@ -362,12 +362,12 @@ var stickerSize = canvas ? canvas.width / 5 : 60;
 
 // Colors map (standard wca)
 var colors = {
-    1: 'white',  // U
-    2: 'red',    // R
-    3: 'green',  // F
-    4: 'yellow', // D
-    5: 'orange', // L
-    6: 'blue'    // B
+    1: 'rgb(255, 255, 255)',  // U
+    2: 'rgb(255, 51, 51)',    // R
+    3: 'rgb(17, 238, 17)',  // F
+    4: 'rgb(255, 255, 0)', // D
+    5: 'rgba(248, 136, 38, 1)', // L
+    6: 'rgb(17, 119, 221)'    // B
 };
 
 function fillSticker(x, y, colour) {
@@ -479,7 +479,7 @@ function drawCube() {
     // Draw outlines
     // Style: Faded but visible
     ctx.lineWidth = 1;
-    ctx.strokeStyle = "rgba(0, 0, 0, 0.4)";
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.6)";
     
     ctx.beginPath();
 
