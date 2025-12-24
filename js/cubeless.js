@@ -641,7 +641,16 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Calculate available space
         var headerHeight = document.querySelector('header').offsetHeight;
-        var controlsHeight = document.querySelector('.controls-grid').offsetHeight;
+        
+        // Find the currently visible controls grid to get accurate height
+        var controlsHeight = 0;
+        var grids = document.querySelectorAll('.controls-grid');
+        for (var i = 0; i < grids.length; i++) {
+            if (grids[i].offsetHeight > 0) {
+                controlsHeight = grids[i].offsetHeight;
+                break;
+            }
+        }
         var availableHeight = window.innerHeight - headerHeight - controlsHeight - 40; // 40px padding/margin buffer
         var availableWidth = window.innerWidth * 0.70;
         
