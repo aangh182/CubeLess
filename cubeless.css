@@ -3,7 +3,7 @@ html {
     overflow: hidden;
     width: 100%;
     height: 100%;
-    touch-action: none; /* Prevent pinch zoom etc at root */
+    touch-action: none;
 }
 
 * {
@@ -30,16 +30,16 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 10px; /* Reduced side padding */
+    padding: 10px 10px;
     background-color: #222;
     box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-    flex-shrink: 0; /* Header doesn't shrink */
+    flex-shrink: 0;
     z-index: 10;
 }
 
 .header-buttons {
     display: flex;
-    gap: 8px; /* Reduced gap */
+    gap: 8px;
 }
 
 h1 {
@@ -48,8 +48,6 @@ h1 {
     font-weight: normal;
 }
 
-/* Bigger touch targets for header buttons */
-/* Icon buttons in header */
 .icon-btn {
     background: none;
     border: none;
@@ -79,12 +77,12 @@ h1 {
 
 #layout-btn {
     position: absolute;
-    bottom: 15px; /* Spacing from bottom of container */
-    right: 15px; /* Spacing from right */
+    bottom: 15px;
+    right: 15px;
     background-color: rgba(50, 50, 50, 0.8);
     color: white;
     border: 1px solid #555;
-    border-radius: 50%; /* Circle */
+    border-radius: 50%;
     width: 45px;
     height: 45px;
     font-size: 24px;
@@ -115,7 +113,7 @@ h1 {
     100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
 }
 
-/* Modal styles - kept mostly same but ensuring full screen overlay */
+/* Modal */
 .modal {
     position: fixed; 
     z-index: 200; 
@@ -127,16 +125,16 @@ h1 {
     display: flex;
     justify-content: center;
     align-items: center;
-    touch-action: auto; /* Allow scrolling inside modal */
+    touch-action: auto;
 }
 
 .modal-content {
     background-color: #222;
     padding: 20px;
     border: 1px solid #444;
-    width: 85%; /* Slightly smaller width percentage */
-    max-width: 320px; /* Reduced max-width to match compact theme */
-    max-height: 70%; /* Reduced max-height */
+    width: 85%;
+    max-width: 320px;
+    max-height: 70%;
     overflow-y: auto;
     color: white;
     border-radius: 8px;
@@ -147,7 +145,7 @@ h1 {
 .modal-content h2 {
     display: flex;
     align-items: center;
-    gap: 8px; /* Space between text and button */
+    gap: 8px;
     margin-top: 0;
 }
 
@@ -160,7 +158,7 @@ h1 {
     position: absolute;
     top: 5px;
     right: 15px;
-    padding: 10px; /* larger touch area */
+    padding: 10px;
 }
 
 #move-history-list {
@@ -178,9 +176,9 @@ h1 {
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 0.8em; /* Smaller icon */
+    font-size: 0.8em;
     padding: 5px;
-    display: flex; /* Ensure icon inside button is centered */
+    display: flex;
     align-items: center;
     filter: grayscale(100%);
     transition: transform 0.1s;
@@ -195,10 +193,10 @@ h1 {
 }
 
 .cube-container {
-    flex-grow: 1; /* Take up all available space */
+    flex-grow: 1;
     display: flex;
     justify-content: center;
-    align-items: center; /* Center horizontally and vertically */
+    align-items: center;
     overflow: hidden;
     width: 100%;
     position: relative;
@@ -212,10 +210,10 @@ canvas {
 .controls-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-gap: 4px; /* Tighten gap */
-    padding: 4px; /* Reduced padding */
+    grid-gap: 4px;
+    padding: 4px;
     width: 100%;
-    max-width: 100%; /* Fill entire width */
+    max-width: 100%;
     margin: 0;
     box-sizing: border-box;
     background-color: #111;
@@ -224,12 +222,12 @@ canvas {
 }
 
 .grid-btn {
-    aspect-ratio: unset; /* Allow buttons to stretch vertically if needed, or controlled by grid */
-    height: 75px; /* Taller buttons */
+    aspect-ratio: unset;
+    height: 75px;
     background-color: #333;
     border: 1px solid #444;
     border-radius: 6px; 
-    font-size: 22px; /* Larger text */
+    font-size: 22px;
     color: #eee;
     cursor: pointer;
     display: flex;
@@ -242,14 +240,14 @@ canvas {
 
 .grid-btn:active {
     background-color: #555;
-    transform: scale(0.96); /* Feedback */
+    transform: scale(0.96);
 }
 
-/* Mobile responsive adjustments - ensuring it fits even tiny screens */
+/* Mobile responsive adjustments */
 @media (max-height: 600px) {
     .grid-btn {
         font-size: 14px;
-        aspect-ratio: 1.5; /* flatter buttons on short screens */
+        aspect-ratio: 1.5;
     }
     h1 {
         font-size: 16px;

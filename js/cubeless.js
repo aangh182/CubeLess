@@ -1,355 +1,110 @@
 
-// Helper for parsing algs (used in RubiksCube class)
-// Note: The original code had regex inside doAlgorithm.
-
 /**
- * RubiksCube class copied from js/RubiksCube.js to decouple from index.html UI logic
+ * RubiksCube: A wrapper around js/cube.js and js/solve.js
+ * Decouples logic from the UI.
  */
+
+
+// Configuration for Cube appearance (Colors, Outline, etc.)
+var CUBE_CONFIG = {
+    colors: {
+        1: 'rgb(255, 255, 255)',    // U (White)
+        2: 'rgb(255, 51, 51)',      // R (Red)
+        3: 'rgb(17, 238, 17)',      // F (Green)
+        4: 'rgb(255, 255, 0)',      // D (Yellow)
+        5: 'rgba(248, 136, 38, 1)', // L (Orange)
+        6: 'rgb(17, 119, 221)'      // B (Blue)
+    },
+    outline: {
+        width: 1,
+        color: "rgba(0, 0, 0, 0.6)"
+    }
+};
+
 function RubiksCube() {
-    this.cubestate = [1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6];
+    // Initialize library cube
+    if (typeof Cube === 'function') {
+        this.cube = new Cube();
+        // Ensure solver tables are computed if not already
+        if (Cube.moveTables && !Cube.moveTables.twist) {
+            Cube.initSolver();
+        }
+    } else {
+        console.error("Cube library not found! Please ensure cube.js and solve.js are loaded.");
+        // Mock fallback to prevent crashes
+        this.cube = {
+            asString: function() { return "UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB"; },
+            move: function() {},
+            identity: function() {},
+            isSolved: function() { return true; },
+            solve: function() { return ""; },
+            upright: function() { return ""; }
+        };
+    }
+
+    // Map internal string state to UI integer array (1:U, 2:R, 3:F, 4:D, 5:L, 6:B)
+    Object.defineProperty(this, 'cubestate', {
+        get: function() {
+            var map = { 'U': 1, 'R': 2, 'F': 3, 'D': 4, 'L': 5, 'B': 6 };
+            var str = this.cube.asString();
+            var arr = [];
+            for (var i = 0; i < str.length; i++) {
+                arr.push(map[str[i]] || 0);
+            }
+            return arr;
+        }
+    });
 
     this.resetCube = function(){
-        this.cubestate = [1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6];
+        this.cube.identity();
     }
+
     this.solution = function(){
-        if (typeof Cube !== 'undefined') {
-            var gcube = Cube.fromString(this.toString());
-            return gcube.solve();
-        }
-        return "";
+        return this.cube.solve() || "";
     }
 
     this.isSolved = function(){
-        for (var i = 0; i<6;i++){
-            var colour1 = this.cubestate[9*i];
-            for (var j = 0; j<8; j++){
-                if (this.cubestate[9*i + j + 1]!=colour1){
-                    return false;
-                }
-            }
-        }
-        return true;
+        return this.cube.isSolved();
     }
+
     this.wcaOrient = function() {
-        // u-r--f--d--l--b
-        // 4 13 22 31 40 49
-        //
-        var moves = "";
-
-        if (this.cubestate[13]==1) {//R face
-            this.doAlgorithm("z'");
-            moves +="z'";
-            moves += " ";
-        } else if (this.cubestate[22]==1) {//on F face
-            this.doAlgorithm("x");
-            moves+="x";
-            moves += " ";
-        } else if (this.cubestate[31]==1) {//on D face
-            this.doAlgorithm("x2");
-            moves+="x2";
-            moves += " ";
-        } else if (this.cubestate[40]==1) {//on L face
-            this.doAlgorithm("z");
-            moves+="z";
-            moves += " ";
-        } else if (this.cubestate[49]==1) {//on B face
-            this.doAlgorithm("x'");
-            moves+="x'";
-            moves += " ";
+        var moves = this.cube.upright();
+        if (moves) {
+            this.cube.move(moves);
         }
-
-        if (this.cubestate[13]==3) {//R face
-            this.doAlgorithm("y");
-            moves+="y";
-            moves += " ";
-        } else if (this.cubestate[40]==3) {//on L face
-            this.doAlgorithm("y'");
-            moves+="y'";
-            moves += " ";
-        } else if (this.cubestate[49]==3) {//on B face
-            this.doAlgorithm("y2");
-            moves+="y2";
-            moves += " ";
-        }
-
         return moves;
     }
-    this.toString = function(){
-        var str = "";
-        var i;
-        var sides = ["U","R","F","D","L","B"]
-        for(i=0;i<this.cubestate.length;i++){
-            str+=sides[this.cubestate[i]-1];
-        }
-        return str;
 
+    this.toString = function(){
+        return this.cube.asString();
     }
 
     this.doAlgorithm = function(alg) {
-        if (alg == "") return;
+        if (!alg) return;
 
-        var moveArr = alg.split(/(?=[A-Za-z])/);
-        var i;
-
-        for (i = 0;i<moveArr.length;i++) {
-            var move = moveArr[i];
-            var myRegexp = /([RUFBLDrufbldxyzEMS])(\d*)('?)/g;
-            var match = myRegexp.exec(move.trim());
-
-
-            if (match!=null) {
-
-                var side = match[1];
-
-                var times = 1;
-                if (!match[2]=="") {
-                    times = match[2] % 4;
-                }
-
-                if (match[3]=="'") {
-                    times = (4 - times) % 4;
-                }
-
-                switch (side) {
-                    case "R":
-                        this.doR(times);
-                        break;
-                    case "U":
-                        this.doU(times);
-                        break;
-                    case "F":
-                        this.doF(times);
-                        break;
-                    case "B":
-                        this.doB(times);
-                        break;
-                    case "L":
-                        this.doL(times);
-                        break;
-                    case "D":
-                        this.doD(times);
-                        break;
-                    case "r":
-                        this.doRw(times);
-                        break;
-                    case "u":
-                        this.doUw(times);
-                        break;
-                    case "f":
-                        this.doFw(times);
-                        break;
-                    case "b":
-                        this.doBw(times);
-                        break;
-                    case "l":
-                        this.doLw(times);
-                        break;
-                    case "d":
-                        this.doDw(times);
-                        break;
-                    case "x":
-                        this.doX(times);
-                        break;
-                    case "y":
-                        this.doY(times);
-                        break;
-                    case "z":
-                        this.doZ(times);
-                        break;
-                    case "E":
-                        this.doE(times);
-                        break;
-                    case "M":
-                        this.doM(times);
-                        break;
-                    case "S":
-                        this.doS(times);
-                        break;
-
-                }
-            } else {
-
-                console.log("Invalid alg, or no alg specified:" + alg + "|");
-
+        // Parse moves from string (e.g. "R U2 R'")
+        var myRegexp = /([RUFBLDrufbldxyzEMS])(\d*)('?)/g;
+        var match;
+        
+        while ((match = myRegexp.exec(alg)) !== null) {
+            var side = match[1];
+            var times = 1;
+            
+            if (match[2] !== "") {
+                times = parseInt(match[2]) % 4;
             }
+            if (match[3] === "'") {
+                times = (4 - times) % 4;
+            }
+            
+            if (times === 0) continue;
 
+            var suffix = "";
+            if (times === 2) suffix = "2";
+            if (times === 3) suffix = "'";
+            
+            this.cube.move(side + suffix);
         }
-
-    }
-
-    this.doU = function(times) {
-        var i;
-        for (i = 0; i < times; i++) {
-            cubestate = this.cubestate;
-            this.cubestate = [cubestate[6], cubestate[3], cubestate[0], cubestate[7], cubestate[4], cubestate[1], cubestate[8], cubestate[5], cubestate[2], cubestate[45], cubestate[46], cubestate[47], cubestate[12], cubestate[13], cubestate[14], cubestate[15], cubestate[16], cubestate[17], cubestate[9], cubestate[10], cubestate[11], cubestate[21], cubestate[22], cubestate[23], cubestate[24], cubestate[25], cubestate[26], cubestate[27], cubestate[28], cubestate[29], cubestate[30], cubestate[31], cubestate[32], cubestate[33], cubestate[34], cubestate[35], cubestate[18], cubestate[19], cubestate[20], cubestate[39], cubestate[40], cubestate[41], cubestate[42], cubestate[43], cubestate[44], cubestate[36], cubestate[37], cubestate[38], cubestate[48], cubestate[49], cubestate[50], cubestate[51], cubestate[52], cubestate[53]];
-        }
-
-    }
-
-    this.doR = function(times) {
-        var i;
-        for (i = 0; i < times; i++) {
-            cubestate = this.cubestate;
-
-            this.cubestate = [cubestate[0], cubestate[1], cubestate[20], cubestate[3], cubestate[4], cubestate[23], cubestate[6], cubestate[7], cubestate[26], cubestate[15], cubestate[12], cubestate[9], cubestate[16], cubestate[13], cubestate[10], cubestate[17], cubestate[14], cubestate[11], cubestate[18], cubestate[19], cubestate[29], cubestate[21], cubestate[22], cubestate[32], cubestate[24], cubestate[25], cubestate[35], cubestate[27], cubestate[28], cubestate[51], cubestate[30], cubestate[31], cubestate[48], cubestate[33], cubestate[34], cubestate[45], cubestate[36], cubestate[37], cubestate[38], cubestate[39], cubestate[40], cubestate[41], cubestate[42], cubestate[43], cubestate[44], cubestate[8], cubestate[46], cubestate[47], cubestate[5], cubestate[49], cubestate[50], cubestate[2], cubestate[52], cubestate[53]]
-        }
-
-    }
-
-    this.doF = function(times) {
-        var i;
-        for (i = 0; i < times; i++) {
-            cubestate = this.cubestate;
-            this.cubestate = [cubestate[0], cubestate[1], cubestate[2], cubestate[3], cubestate[4], cubestate[5], cubestate[44], cubestate[41], cubestate[38], cubestate[6], cubestate[10], cubestate[11], cubestate[7], cubestate[13], cubestate[14], cubestate[8], cubestate[16], cubestate[17], cubestate[24], cubestate[21], cubestate[18], cubestate[25], cubestate[22], cubestate[19], cubestate[26], cubestate[23], cubestate[20], cubestate[15], cubestate[12], cubestate[9], cubestate[30], cubestate[31], cubestate[32], cubestate[33], cubestate[34], cubestate[35], cubestate[36], cubestate[37], cubestate[27], cubestate[39], cubestate[40], cubestate[28], cubestate[42], cubestate[43], cubestate[29], cubestate[45], cubestate[46], cubestate[47], cubestate[48], cubestate[49], cubestate[50], cubestate[51], cubestate[52], cubestate[53]];
-        }
-
-    }
-
-    this.doD = function(times) {
-        var i;
-        for (i = 0; i < times; i++) {
-            cubestate = this.cubestate;
-            this.cubestate = [cubestate[0], cubestate[1], cubestate[2], cubestate[3], cubestate[4], cubestate[5], cubestate[6], cubestate[7], cubestate[8], cubestate[9], cubestate[10], cubestate[11], cubestate[12], cubestate[13], cubestate[14], cubestate[24], cubestate[25], cubestate[26], cubestate[18], cubestate[19], cubestate[20], cubestate[21], cubestate[22], cubestate[23], cubestate[42], cubestate[43], cubestate[44], cubestate[33], cubestate[30], cubestate[27], cubestate[34], cubestate[31], cubestate[28], cubestate[35], cubestate[32], cubestate[29], cubestate[36], cubestate[37], cubestate[38], cubestate[39], cubestate[40], cubestate[41], cubestate[51], cubestate[52], cubestate[53], cubestate[45], cubestate[46], cubestate[47], cubestate[48], cubestate[49], cubestate[50], cubestate[15], cubestate[16], cubestate[17]];
-        }
-
-    }
-
-    this.doL = function(times) {
-        var i;
-        for (i = 0; i < times; i++) {
-            cubestate = this.cubestate;
-            this.cubestate = [cubestate[53], cubestate[1], cubestate[2], cubestate[50], cubestate[4], cubestate[5], cubestate[47], cubestate[7], cubestate[8], cubestate[9], cubestate[10], cubestate[11], cubestate[12], cubestate[13], cubestate[14], cubestate[15], cubestate[16], cubestate[17], cubestate[0], cubestate[19], cubestate[20], cubestate[3], cubestate[22], cubestate[23], cubestate[6], cubestate[25], cubestate[26], cubestate[18], cubestate[28], cubestate[29], cubestate[21], cubestate[31], cubestate[32], cubestate[24], cubestate[34], cubestate[35], cubestate[42], cubestate[39], cubestate[36], cubestate[43], cubestate[40], cubestate[37], cubestate[44], cubestate[41], cubestate[38], cubestate[45], cubestate[46], cubestate[33], cubestate[48], cubestate[49], cubestate[30], cubestate[51], cubestate[52], cubestate[27]];
-        }
-
-    }
-
-    this.doB = function(times) {
-        var i;
-        for (i = 0; i < times; i++) {
-            cubestate = this.cubestate;
-            this.cubestate = [cubestate[11], cubestate[14], cubestate[17], cubestate[3], cubestate[4], cubestate[5], cubestate[6], cubestate[7], cubestate[8], cubestate[9], cubestate[10], cubestate[35], cubestate[12], cubestate[13], cubestate[34], cubestate[15], cubestate[16], cubestate[33], cubestate[18], cubestate[19], cubestate[20], cubestate[21], cubestate[22], cubestate[23], cubestate[24], cubestate[25], cubestate[26], cubestate[27], cubestate[28], cubestate[29], cubestate[30], cubestate[31], cubestate[32], cubestate[36], cubestate[39], cubestate[42], cubestate[2], cubestate[37], cubestate[38], cubestate[1], cubestate[40], cubestate[41], cubestate[0], cubestate[43], cubestate[44], cubestate[51], cubestate[48], cubestate[45], cubestate[52], cubestate[49], cubestate[46], cubestate[53], cubestate[50], cubestate[47]];
-        }
-
-    }
-
-    this.doE = function(times) {
-        var i;
-        for (i = 0; i < times; i++) {
-            cubestate = this.cubestate;
-            this.cubestate = [cubestate[0], cubestate[1], cubestate[2], cubestate[3], cubestate[4], cubestate[5], cubestate[6], cubestate[7], cubestate[8], cubestate[9], cubestate[10], cubestate[11], cubestate[21], cubestate[22], cubestate[23], cubestate[15], cubestate[16], cubestate[17], cubestate[18], cubestate[19], cubestate[20], cubestate[39], cubestate[40], cubestate[41], cubestate[24], cubestate[25], cubestate[26], cubestate[27], cubestate[28], cubestate[29], cubestate[30], cubestate[31], cubestate[32], cubestate[33], cubestate[34], cubestate[35], cubestate[36], cubestate[37], cubestate[38], cubestate[48], cubestate[49], cubestate[50], cubestate[42], cubestate[43], cubestate[44], cubestate[45], cubestate[46], cubestate[47], cubestate[12], cubestate[13], cubestate[14], cubestate[51], cubestate[52], cubestate[53]];
-        }
-
-    }
-
-    this.doM = function(times) {
-        var i;
-        for (i = 0; i < times; i++) {
-            cubestate = this.cubestate;
-            this.cubestate = [cubestate[0], cubestate[52], cubestate[2], cubestate[3], cubestate[49], cubestate[5], cubestate[6], cubestate[46], cubestate[8], cubestate[9], cubestate[10], cubestate[11], cubestate[12], cubestate[13], cubestate[14], cubestate[15], cubestate[16], cubestate[17], cubestate[18], cubestate[1], cubestate[20], cubestate[21], cubestate[4], cubestate[23], cubestate[24], cubestate[7], cubestate[26], cubestate[27], cubestate[19], cubestate[29], cubestate[30], cubestate[22], cubestate[32], cubestate[33], cubestate[25], cubestate[35], cubestate[36], cubestate[37], cubestate[38], cubestate[39], cubestate[40], cubestate[41], cubestate[42], cubestate[43], cubestate[44], cubestate[45], cubestate[34], cubestate[47], cubestate[48], cubestate[31], cubestate[50], cubestate[51], cubestate[28], cubestate[53]];
-        }
-
-    }
-
-    this.doS = function(times) {
-        var i;
-        for (i = 0; i < times; i++) {
-            cubestate = this.cubestate;
-            this.cubestate = [cubestate[0], cubestate[1], cubestate[2], cubestate[43], cubestate[40], cubestate[37], cubestate[6], cubestate[7], cubestate[8], cubestate[9], cubestate[3], cubestate[11], cubestate[12], cubestate[4], cubestate[14], cubestate[15], cubestate[5], cubestate[17], cubestate[18], cubestate[19], cubestate[20], cubestate[21], cubestate[22], cubestate[23], cubestate[24], cubestate[25], cubestate[26], cubestate[27], cubestate[28], cubestate[29], cubestate[16], cubestate[13], cubestate[10], cubestate[33], cubestate[34], cubestate[35], cubestate[36], cubestate[30], cubestate[38], cubestate[39], cubestate[31], cubestate[41], cubestate[42], cubestate[32], cubestate[44], cubestate[45], cubestate[46], cubestate[47], cubestate[48], cubestate[49], cubestate[50], cubestate[51], cubestate[52], cubestate[53]];
-        }
-
-    }
-
-    this.doX = function(times) {
-        var i;
-        for (i = 0; i < times; i++) {
-            cubestate = this.cubestate;
-            this.doR(1);
-            this.doM(3);
-            this.doL(3);
-        }
-    }
-
-    this.doY = function(times) {
-        var i;
-        for (i = 0; i < times; i++) {
-            cubestate = this.cubestate;
-
-            this.doU(1);
-            this.doE(3);
-            this.doD(3);
-        }
-    }
-
-    this.doZ = function(times) {
-        var i;
-        for (i = 0; i < times; i++) {
-            cubestate = this.cubestate;
-
-            this.doF(1);
-            this.doS(1);
-            this.doB(3);
-        }
-    }
-
-    this.doUw = function(times) {
-        var i;
-        for (i = 0; i < times; i++) {
-            cubestate = this.cubestate;
-            this.doE(3);
-            this.doU(1);
-
-        }
-
-    }
-
-    this.doRw = function(times) {
-        var i;
-        for (i = 0; i < times; i++) {
-            cubestate = this.cubestate;
-            this.doM(3);
-            this.doR(1);
-        }
-
-    }
-
-    this.doFw = function(times) {
-        var i;
-        for (i = 0; i < times; i++) {
-            cubestate = this.cubestate;
-            this.doS(1);
-            this.doF(1);
-        }
-
-    }
-
-    this.doDw = function(times) {
-        var i;
-        for (i = 0; i < times; i++) {
-            cubestate = this.cubestate;
-            this.doE(1);
-            this.doD(1);
-        }
-
-    }
-
-    this.doLw = function(times) {
-        var i;
-        for (i = 0; i < times; i++) {
-            cubestate = this.cubestate;
-            this.doM(1);
-            this.doL(1);
-        }
-
-    }
-
-    this.doBw = function(times) {
-        var i;
-        for (i = 0; i < times; i++) {
-            cubestate = this.cubestate;
-            this.doS(3);
-            this.doB(1);
-        }
-
     }
 }
 
@@ -360,15 +115,7 @@ var ctx = canvas ? canvas.getContext("2d") : null;
 // The virtual cube view is 5 stickers wide and 6 stickers high.
 var stickerSize = canvas ? canvas.width / 5 : 60; 
 
-// Colors map (standard wca)
-var colors = {
-    1: 'rgb(255, 255, 255)',  // U
-    2: 'rgb(255, 51, 51)',    // R
-    3: 'rgb(17, 238, 17)',  // F
-    4: 'rgb(255, 255, 0)', // D
-    5: 'rgba(248, 136, 38, 1)', // L
-    6: 'rgb(17, 119, 221)'    // B
-};
+// Colors map (moved to CUBE_CONFIG at top)
 
 function fillSticker(x, y, colour) {
     if (!ctx) return;
@@ -393,7 +140,7 @@ function fillWithIndex(x, y, face, index, cubeArray) {
     
     var finalIndex = offset + (index - 1);
     var colorCode = cubeArray[finalIndex];
-    var colour = colors[colorCode] || 'grey';
+    var colour = CUBE_CONFIG.colors[colorCode] || 'grey';
     
     fillSticker(x, y, colour);
 }
@@ -414,7 +161,6 @@ function drawCube() {
 
     var cubeArray = cube.cubestate;
     
-    // Logic from RubiksCube.js drawCube (3x3 branch)
     // Row 0
     fillWithIndex(0, 0, "l", 1, cubeArray);
     fillWithIndex(1, 0, "u", 1, cubeArray);
@@ -437,20 +183,11 @@ function drawCube() {
     fillWithIndex(4, 2, "r", 1, cubeArray);
 
     // Row 3
-    fillWithIndex(0, 3, "l", 3, cubeArray); // Note: original code checks l3 again? 
-    // Checking RubiksCube.js line 518: fillWithIndex(0, 3, "l", 3, cubeArray);
-    // Yes, it reuses l3 for the corner of the front face view? 
-    // Actually visual inspection of 'virtual cube':
-    // It seems to be drawing the L strip adjacent to U and F.
-    // L face: 1 2 3 (top row), 4 5 6 (middle), 7 8 9 (bottom)
-    // Row 0 uses L1. Row 1 uses L2. Row 2 uses L3.
-    // Row 3 (start of F face) uses L3 again? That seems to be the mapping in the original file.
-    // Let's stick to the original code faithfully.
-    
+    fillWithIndex(0, 3, "l", 3, cubeArray);
     fillWithIndex(1, 3, "f", 1, cubeArray);
     fillWithIndex(2, 3, "f", 2, cubeArray);
     fillWithIndex(3, 3, "f", 3, cubeArray);
-    fillWithIndex(4, 3, "r", 1, cubeArray); // Reuse R1 ??
+    fillWithIndex(4, 3, "r", 1, cubeArray);
 
     // Row 4
     fillWithIndex(0, 4, "l", 6, cubeArray);
@@ -467,19 +204,9 @@ function drawCube() {
     fillWithIndex(4, 5, "r", 7, cubeArray);
     
     
-    // Outline blocks
-    // Top block (U face + wings)
-    // ctx.strokeRect(-1, -1, 1 + stickerSize * 2, 1 + stickerSize); ??
-    // The original code draws complex rectangles.
-    // Let's simplify: Draw outline around every sticker.
-    // The original code has specific block outlines.
-    // Since user wants "exactly like that", I should try to specific block outlines if possible, 
-    // but simpler is to outline each sticker first, then maybe thick border around faces.
-    
     // Draw outlines
-    // Style: Faded but visible
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "rgba(0, 0, 0, 0.6)";
+    ctx.lineWidth = CUBE_CONFIG.outline.width;
+    ctx.strokeStyle = CUBE_CONFIG.outline.color;
     
     ctx.beginPath();
 
@@ -658,7 +385,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // w / h = 5 / 6  => w = 5/6 * h
         
         // 1. Try limiting by width first
-        var newWidth = Math.min(availableWidth, 260); // Max width 260px
+        var newWidth = Math.min(availableWidth, 260); 
         var newHeight = newWidth * (6/5);
         
         // 2. If height is too big, limit by height
@@ -760,8 +487,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Grid buttons
     var buttons = document.querySelectorAll(".grid-btn");
     buttons.forEach(function(btn) {
-        // Use touchstart for faster response on mobile, fallback to click
-        // But preventing default on touchstart prevents ghost clicks usually
+        // Handle touch and click to prevent ghosts
         var handled = false;
         
         var action = function(e) {
