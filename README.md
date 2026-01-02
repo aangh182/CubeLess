@@ -5,9 +5,7 @@
 
   **A minimalist mobile Rubik's Cube simulator for quick alg testing and typing.**
 
-  [![Live Demo](https://img.shields.io/badge/Live-Demo-2ecc71?style=for-the-badge&logo=google-chrome&logoColor=white)](https://aangh182.github.io/CubeLess/)
-
-A minimalist mobile Rubik's Cube simulator for quick alg testing and typing.
+  [![Start App](https://img.shields.io/badge/Start-App-2ecc71?style=for-the-badge&logo=google-chrome&logoColor=white)](https://aangh182.github.io/CubeLess/)
 
 Based on: [Alg Trainer](https://tao-yu.github.io/Alg-Trainer/)
 
