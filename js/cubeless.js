@@ -255,6 +255,7 @@ function drawCube() {
 
 // History log
 var moveHistory = [];
+var currentScramble = "";
 var isRecording = false;
 
 function logMove(move) {
@@ -272,12 +273,18 @@ function handleButton(move) {
 function scramble() {
     // 20 random moves
     var moves = ['U', 'D', 'L', 'R', 'F', 'B', "U'", "D'", "L'", "R'", "F'", "B'", "U2", "D2", "L2", "R2", "F2", "B2"];
+    var scrambleSeq = [];
     for (var i = 0; i < 20; i++) {
         var r = Math.floor(Math.random() * moves.length);
-        var move = moves[r];
-        cube.doAlgorithm(move);
-        logMove(move);
+        scrambleSeq.push(moves[r]);
     }
+    
+    var scrambleStr = scrambleSeq.join(" ");
+    cube.doAlgorithm(scrambleStr);
+    
+    // Store scramble separate from user history
+    currentScramble = scrambleStr;
+    moveHistory = []; // Reset user moves
     drawCube();
 }
 
@@ -346,25 +353,40 @@ function optimizeMoves(history) {
 
 function updateHistoryView() {
     var list = document.getElementById("move-history-list");
+    
+    // Reset count display immediately
+    var countSpan = document.getElementById("solution-count");
+    if (countSpan) countSpan.textContent = "";
+
     if (!list) return;
     list.innerHTML = "";
     
-    if (moveHistory.length === 0) {
-        list.textContent = "(No moves yet)";
-        return;
+    var html = "";
+    
+    if (currentScramble) {
+        html += '<div class="scramble-text">// ' + currentScramble + '</div>';
     }
     
     // Optimize the display of moves
     var optimizedHistory = optimizeMoves(moveHistory);
     
-    if (optimizedHistory.length === 0) {
-        list.textContent = "(Moves canceled out)";
-        return;
+    if (optimizedHistory.length > 0) {
+        html += '<span>' + optimizedHistory.join(" ") + '</span>';
+    } else if (!currentScramble) {
+        html = "(No moves yet)";
     }
 
-    // Join with spaces
-    var text = optimizedHistory.join(" ");
-    list.textContent = text;
+    list.innerHTML = html;
+
+    // Calculate Move Count (Exclude rotations x, y, z)
+    var count = optimizedHistory.filter(function(m) {
+        return !/^[xyz]/.test(m);
+    }).length;
+
+    var countSpan = document.getElementById("solution-count");
+    if (countSpan) {
+        countSpan.textContent = count > 0 ? " (" + count + ")" : "";
+    }
 }
 
 // Initialize
@@ -437,6 +459,7 @@ document.addEventListener('DOMContentLoaded', function() {
         solveBtn.addEventListener('click', function() {
             cube.resetCube();
             moveHistory = []; // Clear history
+            currentScramble = ""; // Clear scramble
             drawCube();
         });
     }
@@ -473,9 +496,15 @@ document.addEventListener('DOMContentLoaded', function() {
     var historyList = document.getElementById("move-history-list");
     if (copyBtn && historyList) {
         copyBtn.addEventListener("click", function() {
-            var text = historyList.textContent;
-            if (text && text !== "(No moves yet)" && text !== "(Moves canceled out)") {
-                navigator.clipboard.writeText(text).then(function() {
+            // Only copy the user's solution, not the scramble
+            var textToCopy = "";
+            var optimizedHistory = optimizeMoves(moveHistory);
+            if (optimizedHistory.length > 0) {
+                textToCopy = optimizedHistory.join(" ");
+            }
+            
+            if (textToCopy) {
+                navigator.clipboard.writeText(textToCopy).then(function() {
                     var original = copyBtn.textContent;
                     copyBtn.textContent = "✅";
                     setTimeout(function() {
@@ -727,18 +756,9 @@ document.addEventListener('DOMContentLoaded', function() {
             var moves = manualInput.value.trim();
             if (moves) {
                 cube.doAlgorithm(moves);
-                // We should probably log these as a single block or individual moves?
-                // For simplicity, let's treat it like a scramble event - maybe not log individual moves 
-                // but just update the visual. Or better, log it so undo works.
-                // The current doAlgorithm doesn't log.
+                currentScramble = moves;
+                moveHistory = []; // Reset user moves for new scramble
                 
-                // Let's log it as a comment or just assume clean state? 
-                // Usually scramble resets history. 
-                // Let's reset history for a manual scramble just like auto scramble usually implies.
-                 moveHistory.push(" // " + moves); // Mark as custom scramble in history?
-                 // Actually, scramble() resets nothing currently, it just appends.
-                 // So we just append.
-                 
                 manualModal.style.display = "none";
                 drawCube();
             }

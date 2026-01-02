@@ -308,6 +308,14 @@ header {
     color: var(--text-primary);
 }
 
+.scramble-text {
+    width: 100%;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: 4px;
+    display: block;
+}
+
 #copy-btn {
     background: transparent;
     border: 1px solid var(--border-subtle);
