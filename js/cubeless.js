@@ -8,16 +8,20 @@
 // Configuration for Cube appearance (Colors, Outline, etc.)
 var CUBE_CONFIG = {
     colors: {
-        1: 'rgb(255, 255, 255)',    // U (White)
-        2: 'rgb(255, 51, 51)',      // R (Red)
-        3: 'rgb(17, 238, 17)',      // F (Green)
-        4: 'rgb(255, 255, 0)',      // D (Yellow)
-        5: 'rgba(248, 136, 38, 1)', // L (Orange)
-        6: 'rgb(17, 119, 221)'      // B (Blue)
+        1: '#ffffff',    // U (White)
+        2: '#ff3333',      // R (Red)
+        3: '#11ee11',      // F (Green)
+        4: '#ffff00',      // D (Yellow)
+        5: '#f88826', // L (Orange)
+        6: '#1177dd'      // B (Blue)
     },
     outline: {
         width: 1,
         color: "rgba(0, 0, 0, 0.6)"
+    },
+    settings: {
+        cancelSolution: true,
+        manualScramble: false
     }
 };
 
@@ -280,6 +284,11 @@ function scramble() {
 
 function optimizeMoves(history) {
     if (history.length === 0) return [];
+    
+    // Check if optimization is disabled by user setting
+    if (!CUBE_CONFIG.settings.cancelSolution) {
+        return history;
+    }
 
     // Helper: get rotation amount (X=1, X2=2, X'=3)
     function getAmount(move) {
@@ -413,7 +422,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Scramble button
     var scrambleBtn = document.getElementById("scramble-btn");
     if (scrambleBtn) {
-        scrambleBtn.addEventListener('click', scramble);
+        scrambleBtn.addEventListener('click', function() {
+            if (CUBE_CONFIG.settings.manualScramble) {
+                openManualScramble();
+            } else {
+                scramble();
+            }
+        });
     }
 
     // Solve button
@@ -528,4 +543,188 @@ document.addEventListener('DOMContentLoaded', function() {
             resizeAndDraw();
         });
     }
+
+    // Side Menu Logic
+    var appTitle = document.querySelector('.app-title');
+    var sideMenu = document.getElementById('side-menu');
+    var menuOverlay = document.getElementById('menu-overlay');
+
+    function toggleMenu() {
+        if (!sideMenu || !menuOverlay) return;
+        
+        var isOpen = sideMenu.classList.contains('open');
+        if (isOpen) {
+            sideMenu.classList.remove('open');
+            menuOverlay.classList.remove('open');
+        } else {
+            sideMenu.classList.add('open');
+            menuOverlay.classList.add('open');
+        }
+    }
+
+    function closeMenu() {
+        if (!sideMenu || !menuOverlay) return;
+        sideMenu.classList.remove('open');
+        menuOverlay.classList.remove('open');
+    }
+
+    if (appTitle) {
+        appTitle.addEventListener('click', toggleMenu);
+    }
+
+    if (menuOverlay) {
+        menuOverlay.addEventListener('click', closeMenu);
+    }
+    
+    // Optional: Close menu when items are clicked (for now)
+    var menuItems = document.querySelectorAll('.menu-item');
+    menuItems.forEach(function(item) {
+        item.addEventListener('click', function() {
+            var id = item.id;
+            // Delay closing menu for visual feedback
+            setTimeout(closeMenu, 150);
+            
+            if (id === 'menu-settings') {
+                openSettings();
+            } else if (id === 'menu-about') {
+                // Future About modal
+                alert("CubeLess V1.2 \nMinimalist Rubik's Cube Simulator");
+            }
+        });
+    });
+
+    // =========================================
+    // Settings Modal Logic
+    // =========================================
+    var settingsModal = document.getElementById("settings-modal");
+    var closeSettingsBtn = document.getElementById("close-settings");
+
+    function openSettings() {
+        if (!settingsModal) return;
+        
+        // Sync UI with current config
+        document.getElementById('setting-cancel-solution').checked = CUBE_CONFIG.settings.cancelSolution;
+        document.getElementById('setting-manual-scramble').checked = CUBE_CONFIG.settings.manualScramble;
+        
+        // Sync colors
+        document.getElementById('color-u').value = CUBE_CONFIG.colors[1];
+        document.getElementById('color-r').value = CUBE_CONFIG.colors[2];
+        document.getElementById('color-f').value = CUBE_CONFIG.colors[3];
+        document.getElementById('color-d').value = CUBE_CONFIG.colors[4];
+        document.getElementById('color-l').value = CUBE_CONFIG.colors[5];
+        document.getElementById('color-b').value = CUBE_CONFIG.colors[6];
+        
+        settingsModal.style.display = "flex";
+    }
+
+    if (closeSettingsBtn) {
+        closeSettingsBtn.addEventListener('click', function() {
+            settingsModal.style.display = "none";
+        });
+    }
+
+    // Settings Toggle Listeners
+    var toggleCancel = document.getElementById('setting-cancel-solution');
+    if (toggleCancel) {
+        toggleCancel.addEventListener('change', function(e) {
+            CUBE_CONFIG.settings.cancelSolution = e.target.checked;
+        });
+    }
+
+    var toggleManual = document.getElementById('setting-manual-scramble');
+    if (toggleManual) {
+        toggleManual.addEventListener('change', function(e) {
+            CUBE_CONFIG.settings.manualScramble = e.target.checked;
+        });
+    }
+
+    // Color Pickers Listeners
+    var colorMap = {
+        'color-u': 1, 'color-r': 2, 'color-f': 3,
+        'color-d': 4, 'color-l': 5, 'color-b': 6
+    };
+
+    Object.keys(colorMap).forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', function(e) {
+                var colorIndex = colorMap[id];
+                CUBE_CONFIG.colors[colorIndex] = e.target.value;
+                drawCube();
+            });
+        }
+    });
+
+    // Close settings on outside click
+    window.addEventListener('click', function(event) {
+        if (event.target == settingsModal) {
+            settingsModal.style.display = "none";
+        }
+    });
+
+
+    // =========================================
+    // Manual Scramble Logic
+    // =========================================
+    var manualModal = document.getElementById("manual-scramble-modal");
+    var closeManualBtn = document.getElementById("close-manual-scramble");
+    var manualInput = document.getElementById("manual-scramble-input");
+    var manualConfirm = document.getElementById("manual-scramble-confirm");
+
+    function openManualScramble() {
+        if (!manualModal) return;
+        manualInput.value = "";
+        manualModal.style.display = "flex";
+        setTimeout(function() { manualInput.focus(); }, 100);
+    }
+    
+    if (closeManualBtn) {
+        closeManualBtn.addEventListener('click', function() {
+            manualModal.style.display = "none";
+        });
+    }
+
+    // Close manual modal on outside click
+    window.addEventListener('click', function(event) {
+        if (event.target == manualModal) {
+            manualModal.style.display = "none";
+        }
+    });
+
+    if (manualConfirm) {
+        manualConfirm.addEventListener('click', function() {
+            var moves = manualInput.value.trim();
+            if (moves) {
+                cube.doAlgorithm(moves);
+                // We should probably log these as a single block or individual moves?
+                // For simplicity, let's treat it like a scramble event - maybe not log individual moves 
+                // but just update the visual. Or better, log it so undo works.
+                // The current doAlgorithm doesn't log.
+                
+                // Let's log it as a comment or just assume clean state? 
+                // Usually scramble resets history. 
+                // Let's reset history for a manual scramble just like auto scramble usually implies.
+                 moveHistory.push(" // " + moves); // Mark as custom scramble in history?
+                 // Actually, scramble() resets nothing currently, it just appends.
+                 // So we just append.
+                 
+                manualModal.style.display = "none";
+                drawCube();
+            }
+        });
+    }
+
+    // Hook up Scramble Button to check setting
+    var scrambleBtn = document.getElementById("scramble-btn");
+    // Remove old listener effectively by replacing clone or just use flag inside listener
+    // Since we added listener before, let's just add logic inside the previous listener zone?
+    // Actually, I can't easily remove the anonymous listener added before. 
+    // I should modify the previous scramble button logic in source or overwrite it.
+    // The previous code block for scramble listener is:
+    /*
+        if (scrambleBtn) {
+            scrambleBtn.addEventListener('click', scramble);
+        }
+    */
+   // I will REPLACE that block with new logic.
 });
