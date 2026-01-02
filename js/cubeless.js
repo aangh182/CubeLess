@@ -587,11 +587,42 @@ document.addEventListener('DOMContentLoaded', function() {
             if (id === 'menu-settings') {
                 openSettings();
             } else if (id === 'menu-about') {
-                // Future About modal
-                alert("CubeLess V1.2 \nMinimalist Rubik's Cube Simulator");
+                openAbout();
             }
         });
     });
+
+    // =========================================
+    // About Modal Logic
+    // =========================================
+    var aboutModal = document.getElementById("about-modal");
+    var closeAboutBtn = document.getElementById("close-about");
+
+    function openAbout() {
+        if (!aboutModal) return;
+        aboutModal.style.display = "flex";
+    }
+
+    if (closeAboutBtn) {
+        closeAboutBtn.addEventListener('click', function() {
+            aboutModal.style.display = "none";
+        });
+    }
+
+    // Close about modal on outside click (re-using window click listener logic would be messy, specific one here)
+    window.addEventListener('click', function(event) {
+        if (event.target == aboutModal) {
+            aboutModal.style.display = "none";
+        }
+    });
+
+    // Easter Egg: Spin image on click
+    var aboutImage = document.querySelector(".about-image");
+    if (aboutImage) {
+        aboutImage.addEventListener("click", function() {
+            aboutImage.classList.toggle("spin-infinite");
+        });
+    }
 
     // =========================================
     // Settings Modal Logic
