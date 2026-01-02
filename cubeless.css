@@ -1,4 +1,41 @@
+/* =========================================
+   CubeLess - Minimalist Monochrome Style
+   ========================================= */
 
+/* Google Font Import */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap');
+
+/* CSS Variables for easy theming */
+:root {
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #141414;
+    --bg-tertiary: #1a1a1a;
+    --bg-elevated: #222222;
+    
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --text-muted: #666666;
+    
+    --border-subtle: #2a2a2a;
+    --border-medium: #3a3a3a;
+    
+    --accent: #ffffff;
+    --accent-dim: rgba(255, 255, 255, 0.1);
+    --accent-hover: rgba(255, 255, 255, 0.05);
+    
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.25s ease;
+    
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-full: 50%;
+    
+    --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
+}
+
+/* Base Reset */
 html {
     overflow: hidden;
     width: 100%;
@@ -8,190 +45,94 @@ html {
 
 * {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-    background-color: black;
-    color: white;
-    font-family: 'Roboto', sans-serif;
-    margin: 0;
-    padding: 0;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-main);
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    overscroll-behavior: none; /* Prevent scroll bounce */
+    overscroll-behavior: none;
     touch-action: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
+/* =========================================
+   Header
+   ========================================= */
 header {
     width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 10px;
-    background-color: #222;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    padding: 12px 16px;
+    background-color: var(--bg-primary);
+    border-bottom: 1px solid var(--border-subtle);
     flex-shrink: 0;
     z-index: 10;
 }
 
 .header-buttons {
     display: flex;
-    gap: 8px;
-}
-
-h1 {
-    font-size: 20px; /* Slightly smaller for mobile */
-    margin: 0;
-    font-weight: normal;
-}
-
-.icon-btn {
-    background: none;
-    border: none;
-    color: #ddd;
-    cursor: pointer;
-    padding: 10px; 
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
+    gap: 4px;
 }
 
 .app-title {
-    font-size: 20px;
-    font-weight: 700;
+    font-size: 18px;
+    font-weight: 500;
     letter-spacing: 0.5px;
-    color: #fff;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    color: var(--text-primary);
+    text-transform: uppercase;
+}
+
+/* Icon Buttons */
+.icon-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 10px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.icon-btn:hover {
+    color: var(--text-primary);
+    background-color: var(--accent-hover);
 }
 
 .icon-btn:active {
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: var(--accent-dim);
     transform: scale(0.95);
-    color: white;
+    color: var(--text-primary);
 }
 
-#layout-btn {
-    position: absolute;
-    bottom: 15px;
-    right: 15px;
-    background-color: rgba(50, 50, 50, 0.8);
-    color: white;
-    border: 1px solid #555;
-    border-radius: 50%;
-    width: 45px;
-    height: 45px;
-    font-size: 24px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    z-index: 50;
-    transition: background-color 0.2s, transform 0.1s;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-}
-
-#layout-btn:active {
-    background-color: rgba(80, 80, 80, 0.9);
-    transform: scale(0.95);
-}
-
+/* Recording State */
 #record-btn.recording {
-    color: #ff4444; /* Red color when recording */
-    background-color: rgba(255, 68, 68, 0.15);
-    animation: pulse-red 2s infinite;
+    color: var(--text-primary);
+    background-color: var(--accent-dim);
+    border-color: var(--border-medium);
+    animation: pulse-recording 2s infinite;
 }
 
-@keyframes pulse-red {
-    0% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.4); }
-    70% { box-shadow: 0 0 0 6px rgba(255, 68, 68, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
+@keyframes pulse-recording {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
 }
 
-/* Modal */
-.modal {
-    position: fixed; 
-    z-index: 200; 
-    left: 0;
-    top: 0;
-    width: 100%; 
-    height: 100%; 
-    background-color: rgba(0,0,0,0.85); 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    touch-action: auto;
-}
-
-.modal-content {
-    background-color: #222;
-    padding: 20px;
-    border: 1px solid #444;
-    width: 85%;
-    max-width: 320px;
-    max-height: 70%;
-    overflow-y: auto;
-    color: white;
-    border-radius: 8px;
-    position: relative;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-}
-
-.modal-content h2 {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 0;
-}
-
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    position: absolute;
-    top: 5px;
-    right: 15px;
-    padding: 10px;
-}
-
-#move-history-list {
-    margin-top: 15px;
-    word-wrap: break-word; 
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    font-family: monospace;
-    font-size: 1.1em;
-    line-height: 1.4;
-}
-
-#copy-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 0.8em;
-    padding: 5px;
-    display: flex;
-    align-items: center;
-    filter: grayscale(100%);
-    transition: transform 0.1s;
-}
-
-#copy-btn:active {
-    transform: scale(0.9);
-}
-
-#copy-btn:hover {
-    filter: none;
-}
-
+/* =========================================
+   Cube Container
+   ========================================= */
 .cube-container {
     flex-grow: 1;
     display: flex;
@@ -200,56 +141,266 @@ h1 {
     overflow: hidden;
     width: 100%;
     position: relative;
+    background-color: var(--bg-primary);
 }
 
-canvas {
-    /* Dimensions controlled by JS */
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+/* Layout Switch Button */
+#layout-btn {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    background-color: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 50;
+    transition: all var(--transition-fast);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
+#layout-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--border-medium);
+}
+
+#layout-btn:active {
+    background-color: var(--bg-elevated);
+    transform: scale(0.95);
+}
+
+/* =========================================
+   Controls Grid (Move Buttons)
+   ========================================= */
 .controls-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-gap: 4px;
-    padding: 4px;
+    grid-gap: 3px;
+    padding: 3px;
     width: 100%;
     max-width: 100%;
-    margin: 0;
-    box-sizing: border-box;
-    background-color: #111;
+    background-color: var(--bg-primary);
     flex-shrink: 0;
-    padding-bottom: max(10px, env(safe-area-inset-bottom)); 
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border-subtle);
 }
 
 .grid-btn {
     aspect-ratio: unset;
-    height: 75px;
-    background-color: #333;
-    border: 1px solid #444;
-    border-radius: 6px; 
+    height: 72px;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
     font-size: 22px;
-    color: #eee;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--text-primary);
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
     user-select: none;
-    transition: background-color 0.1s;
+    transition: all var(--transition-fast);
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.grid-btn:hover {
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-medium);
 }
 
 .grid-btn:active {
-    background-color: #555;
-    transform: scale(0.96);
+    background-color: var(--bg-elevated);
+    transform: scale(0.97);
 }
 
-/* Mobile responsive adjustments */
+/* =========================================
+   Modal
+   ========================================= */
+.modal {
+    position: fixed;
+    z-index: 200;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    touch-action: auto;
+}
+
+.modal-content {
+    background-color: var(--bg-secondary);
+    padding: 24px;
+    border: 1px solid var(--border-subtle);
+    width: 90%;
+    max-width: 360px;
+    max-height: 75%;
+    overflow-y: auto;
+    color: var(--text-primary);
+    border-radius: var(--radius-lg);
+    position: relative;
+}
+
+.modal-content h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 16px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+}
+
+.close {
+    color: var(--text-muted);
+    font-size: 24px;
+    font-weight: 300;
+    cursor: pointer;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    padding: 8px;
+    line-height: 1;
+    transition: color var(--transition-fast);
+}
+
+.close:hover {
+    color: var(--text-primary);
+}
+
+#move-history-list {
+    margin-top: 16px;
+    word-wrap: break-word;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-family: 'SF Mono', 'Consolas', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-primary);
+}
+
+#copy-btn {
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 6px 8px;
+    display: flex;
+    align-items: center;
+    color: var(--text-muted);
+    transition: all var(--transition-fast);
+}
+
+#copy-btn:hover {
+    border-color: var(--border-medium);
+    color: var(--text-primary);
+}
+
+#copy-btn:active {
+    transform: scale(0.95);
+}
+
+/* =========================================
+   Scrollbar Styling (for modal)
+   ========================================= */
+.modal-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: var(--border-medium);
+    border-radius: 3px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* =========================================
+   Mobile Responsive
+   ========================================= */
 @media (max-height: 600px) {
     .grid-btn {
-        font-size: 14px;
-        aspect-ratio: 1.5;
-    }
-    h1 {
+        height: 60px;
         font-size: 16px;
+    }
+    
+    header {
+        padding: 8px 12px;
+    }
+    
+    .app-title {
+        font-size: 16px;
+    }
+    
+    .icon-btn {
+        padding: 8px;
+    }
+    
+    .icon-btn svg {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+@media (max-height: 500px) {
+    .grid-btn {
+        height: 50px;
+        font-size: 14px;
+    }
+}
+
+/* Larger screens */
+@media (min-width: 768px) {
+    header {
+        padding: 16px 24px;
+    }
+    
+    .app-title {
+        font-size: 20px;
+        letter-spacing: 1px;
+    }
+    
+    .controls-grid {
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 8px;
+        grid-gap: 6px;
+    }
+    
+    .grid-btn {
+        height: 80px;
+        font-size: 22px;
+        border-radius: var(--radius-md);
+    }
+    
+    #layout-btn {
+        bottom: 24px;
+        right: 24px;
+        width: 48px;
+        height: 48px;
     }
 }
