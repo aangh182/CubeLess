@@ -117,17 +117,28 @@ header {
     color: var(--text-primary);
 }
 
-/* Recording State */
+/* Recording State - More visible with red accent */
 #record-btn.recording {
-    color: var(--text-primary);
-    background-color: var(--accent-dim);
-    border-color: var(--border-medium);
-    animation: pulse-recording 2s infinite;
+    color: #ff4d4d;
+    background-color: rgba(255, 77, 77, 0.15);
+    border: 1px solid rgba(255, 77, 77, 0.5);
+    box-shadow: 0 0 12px rgba(255, 77, 77, 0.4);
+    animation: pulse-recording 1.5s ease-in-out infinite;
+}
+
+#record-btn.recording svg {
+    fill: #ff4d4d;
 }
 
 @keyframes pulse-recording {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
+    0%, 100% { 
+        box-shadow: 0 0 8px rgba(255, 77, 77, 0.4);
+        opacity: 1;
+    }
+    50% { 
+        box-shadow: 0 0 16px rgba(255, 77, 77, 0.6);
+        opacity: 0.85;
+    }
 }
 
 /* =========================================
