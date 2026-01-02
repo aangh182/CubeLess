@@ -3,7 +3,7 @@ const CACHE_NAME = 'cubeless-v5';
 const ASSETS = [
   './',
   './index.html',
-  './cubeless.css',
+  './style.css',
   './js/cubeless.js',
   './js/cube.js',
   './js/solve.js',
