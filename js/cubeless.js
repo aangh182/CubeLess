@@ -25,6 +25,42 @@ var CUBE_CONFIG = {
     }
 };
 
+// Persistence Logic
+function loadSettings() {
+    try {
+        var saved = localStorage.getItem('cubeless_settings');
+        if (saved) {
+            var parsed = JSON.parse(saved);
+            if (parsed.colors) {
+                 for (var key in parsed.colors) {
+                     CUBE_CONFIG.colors[key] = parsed.colors[key];
+                 }
+            }
+            if (parsed.settings) {
+                 for (var key in parsed.settings) {
+                     CUBE_CONFIG.settings[key] = parsed.settings[key];
+                 }
+            }
+        }
+    } catch (e) {
+        console.error("Error loading settings:", e);
+    }
+}
+
+function saveSettings() {
+    try {
+        localStorage.setItem('cubeless_settings', JSON.stringify({
+            colors: CUBE_CONFIG.colors,
+            settings: CUBE_CONFIG.settings
+        }));
+    } catch (e) {
+        console.error("Error saving settings:", e);
+    }
+}
+
+// Load immediately on startup
+loadSettings();
+
 function RubiksCube() {
     // Initialize library cube
     if (typeof Cube === 'function') {
@@ -688,6 +724,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (toggleCancel) {
         toggleCancel.addEventListener('change', function(e) {
             CUBE_CONFIG.settings.cancelSolution = e.target.checked;
+            saveSettings();
         });
     }
 
@@ -695,6 +732,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (toggleManual) {
         toggleManual.addEventListener('change', function(e) {
             CUBE_CONFIG.settings.manualScramble = e.target.checked;
+            saveSettings();
         });
     }
 
@@ -710,6 +748,7 @@ document.addEventListener('DOMContentLoaded', function() {
             el.addEventListener('input', function(e) {
                 var colorIndex = colorMap[id];
                 CUBE_CONFIG.colors[colorIndex] = e.target.value;
+                saveSettings();
                 drawCube();
             });
         }

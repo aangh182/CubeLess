@@ -439,25 +439,30 @@ header {
 
 .side-menu {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 250px;
-    height: 100%;
+    top: 50%;
+    left: 50%;
+    width: 90%;
+    max-width: 280px;
+    height: auto;
     background-color: var(--bg-secondary);
-    border-right: 1px solid var(--border-subtle);
+    border: 1px solid var(--border-subtle);
     z-index: 300;
-    transform: translateX(-100%);
-    transition: transform var(--transition-normal);
-    padding-top: 60px; /* Space for header if needed, or just padding */
+    transform: translate(-50%, -50%) scale(0.95);
+    opacity: 0;
+    pointer-events: none;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    padding: 16px;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    padding: 70px 16px 16px 16px;
-    box-shadow: 4px 0 12px rgba(0,0,0,0.3);
+    transition: all var(--transition-normal);
 }
 
 .side-menu.open {
-    transform: translateX(0);
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .menu-item {
