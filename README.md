@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="icon.jpg" alt="CubeLess Icon" width="128" style="border-radius: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+  <img src="image/icon.jpg" alt="CubeLess Icon" width="128" style="border-radius: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
 
   # CubeLess
 

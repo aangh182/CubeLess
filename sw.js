@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cubeless-v5';
+const CACHE_NAME = 'cubeless-v6';
 
 const ASSETS = [
   './',
@@ -7,7 +7,9 @@ const ASSETS = [
   './js/cubeless.js',
   './js/cube.js',
   './js/solve.js',
-  './icons/icon.png',
+  './image/icon.jpg',
+  './image/pic.png',
+  './image/wca.png',
   './manifest.json'
 ];
 
