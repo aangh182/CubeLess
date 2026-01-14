@@ -17,7 +17,7 @@ var CUBE_CONFIG = {
     },
     outline: {
         width: 1,
-        color: "rgba(0, 0, 0, 0.6)"
+        color: "#000000"
     },
     settings: {
         cancelSolution: true,
@@ -157,40 +157,85 @@ var stickerSize = canvas ? canvas.width / 5 : 60;
 
 // Colors map (moved to CUBE_CONFIG at top)
 
-function fillSticker(x, y, colour) {
-    if (!ctx) return;
-    ctx.fillStyle = colour;
-    // Overlap slightly to prevent sub-pixel gaps showing background
-    ctx.fillRect(stickerSize * x, stickerSize * y, stickerSize + 0.5, stickerSize + 0.5);
+
+
+function drawPolygon(ctx, color, parts, trans) {
+    var scale = trans[0];
+    var dx = trans[1];
+    var dy = trans[2];
+    ctx.fillStyle = color;
+    
+    // Maintain outline style as requested previously (not present in Sample but necessary for visibility)
+    ctx.lineWidth = CUBE_CONFIG.outline.width;
+    ctx.strokeStyle = CUBE_CONFIG.outline.color;
+    ctx.lineJoin = "round";
+
+    ctx.beginPath();
+    var len = parts[0].length;
+    for (var i = 0; i < len; i++) {
+        var x = (parts[0][i] + dx) * scale;
+        var y = (parts[1][i] + dy) * scale;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fill();
+    
+    if (CUBE_CONFIG.outline.width > 0) {
+        ctx.stroke();
+    }
 }
 
-function fillWithIndex(x, y, face, index, cubeArray) {
-    // face mapping to offset
-    // u=0, r=9, f=18, d=27, l=36, b=45
-    // index is 1-based
-    var offset = 0;
-    switch (face) {
-        case "u": offset = 0; break;
-        case "r": offset = 9; break;
-        case "f": offset = 18; break;
-        case "d": offset = 27; break;
-        case "l": offset = 36; break;
-        case "b": offset = 45; break;
+function renderQCube(ctx, width, posit, colors) {
+    var size = 3; 
+    var gap = Math.sqrt(size / 3) * 0.1; // = 0.1 for size 3
+    
+    // Logic from Sample/qcubennn.js renderQCube
+    for (var i = 0; i < size; i++) {
+        var ii = size - 1 - i;
+        var piece = [[0, 0, 1, 1], [i, i + 1, i + 1, i]];
+        
+        // L and R Faces (Strips)
+        if (i != 0) {
+             // L Face (Face 1) - Col 0 (Left-most column in internal representation)
+            drawPolygon(ctx, colors[posit[(1 * size + i) * size + 0]], piece, [width, gap, size + gap * 2]);
+             // R Face (Face 4) - Col 0
+            drawPolygon(ctx, colors[posit[(4 * size + i) * size + 0]], piece, [width, size + 1 + gap * 3, size + gap * 2]);
+        }
+        
+        // Top Edge details (Connecting L/R to U)
+        if (i != size - 1) {
+            // L Face Top Detail
+            drawPolygon(ctx, colors[posit[(1 * size + 0) * size + ii]], piece, [width, gap + 0, gap + 0]);
+            // R Face Top Detail
+            drawPolygon(ctx, colors[posit[(4 * size + 0) * size + ii]], piece, [width, gap + size + 1 + gap * 2, gap]);
+        }
+        
+        for (var j = 0; j < size; j++) {
+            var pieceInner = [[i, i, i + 1, i + 1], [j, j + 1, j + 1, j]];
+            // U (Face 3)
+            drawPolygon(ctx, colors[posit[(3 * size + j) * size + i]], pieceInner, [width, 1 + gap * 2, gap]);
+            // F (Face 5)
+            drawPolygon(ctx, colors[posit[(5 * size + j) * size + i]], pieceInner, [width, 1 + gap * 2, size + gap * 2]);
+        }
     }
     
-    var finalIndex = offset + (index - 1);
-    var colorCode = cubeArray[finalIndex];
-    var colour = CUBE_CONFIG.colors[colorCode] || 'grey';
+    // Extra polygons for Side Depth (L Face Side and R Face Side depth)
+    var piece2 = [[0, 0, 1, 1], [0, 2 + gap, 2 + gap, 0]];
+    // L Face Corner Depth
+    drawPolygon(ctx, colors[posit[(1 * size + 0) * size + 0]], piece2, [width, gap, gap + size - 1]);
+    // R Face Corner Depth
+    drawPolygon(ctx, colors[posit[(4 * size + 0) * size + 0]], piece2, [width, size + 1 + gap * 3, gap + size - 1]);
     
-    fillSticker(x, y, colour);
+    // Verify White corner highlights from sample if size > 5 (omitted as size=3)
 }
+
 
 function drawCube() {
     if (!canvas || !ctx) {
         canvas = document.getElementById("cube-canvas");
         if (canvas) {
             ctx = canvas.getContext("2d");
-            stickerSize = canvas.width / 5;
         } else {
             return;
         }
@@ -199,94 +244,69 @@ function drawCube() {
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    var cubeArray = cube.cubestate;
+    var cubeArray = cube.cubestate; // 1..6 array [54]
     
+    // posit array as expected by renderQCube
+    // 0:D, 1:L, 2:B, 3:U, 4:R, 5:F
+    var posit = new Array(54);
+    
+    // Helper to copy
+    function copy(src, dst) { posit[dst] = cubeArray[src]; }
+    
+    // U (0-8) -> 3 (Standard)
+    for(var i=0; i<9; i++) copy(0+i, 27+i);
+    
+    // R (9-17) -> 4 (Standard)
+    for(var i=0; i<9; i++) copy(9+i, 36+i);
+    
+    // F (18-26) -> 5 (Standard)
+    for(var i=0; i<9; i++) copy(18+i, 45+i);
+    
+    // D (27-35) -> 0 (Standard)
+    for(var i=0; i<9; i++) copy(27+i, 0+i);
+
+    // L (36-44) -> 1 (MIRRORED Horizontally for qcube projection)
+    // Standard L: 0 1 2 / 3 4 5 / 6 7 8
+    // Target L:   2 1 0 / 5 4 3 / 8 7 6
     // Row 0
-    fillWithIndex(0, 0, "l", 1, cubeArray);
-    fillWithIndex(1, 0, "u", 1, cubeArray);
-    fillWithIndex(2, 0, "u", 2, cubeArray);
-    fillWithIndex(3, 0, "u", 3, cubeArray);
-    fillWithIndex(4, 0, "r", 3, cubeArray);
-
+    copy(36+0, 9+2); copy(36+1, 9+1); copy(36+2, 9+0);
     // Row 1
-    fillWithIndex(0, 1, "l", 2, cubeArray);
-    fillWithIndex(1, 1, "u", 4, cubeArray);
-    fillWithIndex(2, 1, "u", 5, cubeArray);
-    fillWithIndex(3, 1, "u", 6, cubeArray);
-    fillWithIndex(4, 1, "r", 2, cubeArray);
-
+    copy(36+3, 9+5); copy(36+4, 9+4); copy(36+5, 9+3);
     // Row 2
-    fillWithIndex(0, 2, "l", 3, cubeArray);
-    fillWithIndex(1, 2, "u", 7, cubeArray);
-    fillWithIndex(2, 2, "u", 8, cubeArray);
-    fillWithIndex(3, 2, "u", 9, cubeArray);
-    fillWithIndex(4, 2, "r", 1, cubeArray);
-
-    // Row 3
-    fillWithIndex(0, 3, "l", 3, cubeArray);
-    fillWithIndex(1, 3, "f", 1, cubeArray);
-    fillWithIndex(2, 3, "f", 2, cubeArray);
-    fillWithIndex(3, 3, "f", 3, cubeArray);
-    fillWithIndex(4, 3, "r", 1, cubeArray);
-
-    // Row 4
-    fillWithIndex(0, 4, "l", 6, cubeArray);
-    fillWithIndex(1, 4, "f", 4, cubeArray);
-    fillWithIndex(2, 4, "f", 5, cubeArray);
-    fillWithIndex(3, 4, "f", 6, cubeArray);
-    fillWithIndex(4, 4, "r", 4, cubeArray);
-
-    // Row 5
-    fillWithIndex(0, 5, "l", 9, cubeArray);
-    fillWithIndex(1, 5, "f", 7, cubeArray);
-    fillWithIndex(2, 5, "f", 8, cubeArray);
-    fillWithIndex(3, 5, "f", 9, cubeArray);
-    fillWithIndex(4, 5, "r", 7, cubeArray);
+    copy(36+6, 9+8); copy(36+7, 9+7); copy(36+8, 9+6);
     
-    
-    // Draw outlines
-    ctx.lineWidth = CUBE_CONFIG.outline.width;
-    ctx.strokeStyle = CUBE_CONFIG.outline.color;
-    
-    ctx.beginPath();
+    // B (45-53) -> 2 (Standard - not shown in this view but good to have)
+    for(var i=0; i<9; i++) copy(45+i, 18+i);
 
-    // Vertical Lines: Draw at x=0, 2, 3, 5. Skip 1 and 4 (inner edges of side cols).
-    // The grid width is 5 columns wide (0 to 5)
-    var vLines = [0, 2, 3, 5];
-    vLines.forEach(function(ix) {
-        var x = ix * stickerSize;
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, stickerSize * 6);
-    });
 
-    // Horizontal Lines:
-    // Columns are index 0, 1, 2, 3, 4.
-    // Middle columns (1, 2, 3) get all horizontal lines y=0..6
-    // Side columns (0, 4) get horizontal lines y=0..6 EXCEPT y=3 (merged cell)
-    for (var iy = 0; iy <= 6; iy++) {
-        var y = iy * stickerSize;
-        
-        // Col 0 (Left): Draw if not y=3
-        if (iy !== 3) {
-            ctx.moveTo(0, y);
-            ctx.lineTo(stickerSize, y);
-        }
-        
-        // Cols 1, 2, 3 (Middle): Always draw
-        ctx.moveTo(stickerSize, y);
-        ctx.lineTo(stickerSize * 4, y);
-        
-        // Col 4 (Right): Draw if not y=3
-        if (iy !== 3) {
-            ctx.moveTo(stickerSize * 4, y);
-            ctx.lineTo(stickerSize * 5, y);
-        }
-    }
+    // Color Palette
+    var palette = [
+        null, 
+        CUBE_CONFIG.colors[1], // 1: U
+        CUBE_CONFIG.colors[2], // 2: R
+        CUBE_CONFIG.colors[3], // 3: F
+        CUBE_CONFIG.colors[4], // 4: D
+        CUBE_CONFIG.colors[5], // 5: L
+        CUBE_CONFIG.colors[6]  // 6: B
+    ];
+
+    // Scaling Logic
+    var size = 3;
+    var gap = 0.1;
+    var wUnits = size + 2 + gap * 4;
+    var hUnits = size * 2 + gap * 3;
     
-    ctx.stroke();
+    // Add some padding to units to avoid edge clipping
+    var padding = 0.2;
+    var scale = Math.min(canvas.width / (wUnits + padding), canvas.height / (hUnits + padding));
     
-    // Border around the whole thing?
-    // ctx.strokeRect(0, 0, stickerSize * 5, stickerSize * 6);
+    var offsetX = (canvas.width - wUnits * scale) / 2;
+    var offsetY = (canvas.height - hUnits * scale) / 2;
+    
+    ctx.save();
+    ctx.translate(offsetX, offsetY);
+    renderQCube(ctx, scale, posit, palette);
+    ctx.restore();
 }
 
 // History log
