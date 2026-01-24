@@ -25,6 +25,17 @@ var CUBE_CONFIG = {
     }
 };
 
+// Keyboard Layouts
+var KEYBOARD_LAYOUTS = {
+    "advanced": {
+        "1": "S'", "5": "M", "6": "M", "0": "S",
+        "q": "z'", "w": "B", "e": "L'", "r": "Lw'", "t": "x", "y": "x", "u": "Rw", "i": "R", "o": "B'", "p": "z",
+        "a": "y'", "s": "D", "d": "L", "f": "U'", "g": "F'", "h": "F", "j": "U", "k": "R'", "l": "D'", ";": "y",
+        "z": "Dw", "x": "M'", "c": "Uw'", "v": "Lw", "b": "x'", "n": "x'", "m": "Rw'", ",": "Uw", ".": "M'", "/": "Dw'"
+    }
+};
+var currentKeyboardLayout = "advanced";
+
 // Persistence Logic
 function loadSettings() {
     try {
@@ -825,16 +836,27 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Hook up Scramble Button to check setting
-    var scrambleBtn = document.getElementById("scramble-btn");
-    // Remove old listener effectively by replacing clone or just use flag inside listener
-    // Since we added listener before, let's just add logic inside the previous listener zone?
-    // Actually, I can't easily remove the anonymous listener added before. 
-    // I should modify the previous scramble button logic in source or overwrite it.
-    // The previous code block for scramble listener is:
-    /*
-        if (scrambleBtn) {
-            scrambleBtn.addEventListener('click', scramble);
+    if (scrambleBtn) {
+        // Remove old listener if possible (not easily done without reference), 
+        // but since we are replacing the logic or it was defined in HTML originally (no, it was in JS),
+        // we can just add a new listener. 
+        // Actually, looking at previous lines (lines 500+), the listener IS added.
+        // We don't need to do anything here for scramble button as it WAS handled in line 501.
+    }
+
+    // Keyboard Support
+    document.addEventListener('keydown', function(event) {
+        // Ignore if typing in an input
+        if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA") return;
+        
+        var char = event.key.toLowerCase();
+        // Handle special case for punctuation if needed, but standard keys usually work fine
+        
+        var layout = KEYBOARD_LAYOUTS[currentKeyboardLayout];
+        
+        if (layout && layout[char]) {
+            event.preventDefault(); 
+            handleButton(layout[char]);
         }
-    */
-   // I will REPLACE that block with new logic.
+    });
 });
