@@ -324,6 +324,7 @@ function drawCube() {
 var moveHistory = [];
 var currentScramble = "";
 var isRecording = false;
+var isShowingInverse = false;
 
 function logMove(move) {
     if (isRecording) {
@@ -430,27 +431,48 @@ function updateHistoryView() {
     
     var html = "";
     
-    if (currentScramble) {
-        html += '<div class="scramble-text">// ' + currentScramble + '</div>';
+    var optimizedHistory = optimizeMoves(moveHistory);
+    var movesToDisplay = optimizedHistory; // Default to normal history
+
+    if (isShowingInverse) {
+        // Calculate inverse: reverse order, then invert each move
+        var inverted = optimizedHistory.slice().reverse().map(function(move) {
+             if (move.endsWith("2")) return move; // R2' is same as R2
+             if (move.endsWith("'")) return move.slice(0, -1); // R' -> R
+             return move + "'"; // R -> R'
+        });
+        
+        if (inverted.length === 0) {
+            // If inverse is empty (maybe no moves), revert to normal view implicitly or show empty
+            // But user asked "if no moves, keep original text". 
+            // If there are truly no moves, optimizedHistory is also empty.
+             movesToDisplay = [];
+        } else {
+            movesToDisplay = inverted;
+        }
+    } else {
+        // Normal View: Show scramble if exists
+        if (currentScramble) {
+            html += '<div class="scramble-text">// ' + currentScramble + '</div>';
+        }
     }
     
-    // Optimize the display of moves
-    var optimizedHistory = optimizeMoves(moveHistory);
-    
-    if (optimizedHistory.length > 0) {
-        html += '<span>' + optimizedHistory.join(" ") + '</span>';
-    } else if (!currentScramble) {
+    if (movesToDisplay.length > 0) {
+        html += '<span>' + movesToDisplay.join(" ") + '</span>';
+    } else if (!currentScramble && !isShowingInverse) {
         html = "(No moves yet)";
+    } else if (isShowingInverse && movesToDisplay.length === 0 && optimizedHistory.length > 0) {
+         // Should not happen if optimizedHistory > 0, but safe handling
+         html = "(Inverse is empty)";
     }
 
     list.innerHTML = html;
 
     // Calculate Move Count (Exclude rotations x, y, z)
-    var count = optimizedHistory.filter(function(m) {
+    var count = movesToDisplay.filter(function(m) {
         return !/^[xyz]/.test(m);
     }).length;
 
-    var countSpan = document.getElementById("solution-count");
     if (countSpan) {
         countSpan.textContent = count > 0 ? " (" + count + ")" : "";
     }
@@ -538,6 +560,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (solutionBtn && modal) {
         solutionBtn.addEventListener('click', function() {
+            isShowingInverse = false; // Always start with normal view
             updateHistoryView();
             modal.style.display = "flex";
         });
@@ -558,24 +581,52 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Copy button logic
-    var copyBtn = document.getElementById("copy-btn");
+    // Inverse button logic
+    var inverseBtn = document.getElementById("inverse-btn");
     var historyList = document.getElementById("move-history-list");
-    if (copyBtn && historyList) {
-        copyBtn.addEventListener("click", function() {
-            // Only copy the user's solution, not the scramble
+    var countSpan = document.getElementById("solution-count");
+
+    if (inverseBtn && historyList) {
+        inverseBtn.addEventListener("click", function() {
+            // Toggle state
+            var wasInverse = isShowingInverse;
+            isShowingInverse = !isShowingInverse;
+            
+            // Check if there is anything to invert
+            var optimized = optimizeMoves(moveHistory);
+            if (optimized.length === 0) {
+                 // No moves, revert state and do nothing (as per previous request "no moves -> keep")
+                 isShowingInverse = wasInverse;
+                 return;
+            }
+
+            updateHistoryView();
+        });
+    }
+    
+    // Solution Title Copy Logic
+    var solutionTitle = document.getElementById("solution-title");
+    if (solutionTitle) {
+        solutionTitle.addEventListener("click", function() {
+            var list = document.getElementById("move-history-list");
+            if (!list) return;
+
+            // Extract text from the span (this contains just the moves, not the scramble div)
             var textToCopy = "";
-            var optimizedHistory = optimizeMoves(moveHistory);
-            if (optimizedHistory.length > 0) {
-                textToCopy = optimizedHistory.join(" ");
+            var movesSpan = list.querySelector("span");
+            if (movesSpan) {
+                textToCopy = movesSpan.textContent;
             }
             
             if (textToCopy) {
                 navigator.clipboard.writeText(textToCopy).then(function() {
-                    var original = copyBtn.textContent;
-                    copyBtn.textContent = "✅";
+                    var original = solutionTitle.textContent;
+                    solutionTitle.textContent = "Copied!";
+                    solutionTitle.style.color = "#2ecc71"; // Nice green
+                    
                     setTimeout(function() {
-                        copyBtn.textContent = original;
+                        solutionTitle.textContent = original;
+                        solutionTitle.style.color = "";
                     }, 1000);
                 });
             }
