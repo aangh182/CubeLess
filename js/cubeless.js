@@ -503,6 +503,11 @@ function updateHistoryView() {
 document.addEventListener('DOMContentLoaded', function() {
     var c = document.getElementById("cube-canvas");
     var container = document.querySelector('.cube-container');
+    var header = document.querySelector('header');
+    var controlGrids = document.querySelectorAll('.controls-grid');
+    var resizeFrame = null;
+    var colorFrame = null;
+    var colorSaveTimer = null;
     var activeModal = null;
     var lastFocusedBeforeModal = null;
     var focusableSelector = [
@@ -586,8 +591,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     document.addEventListener('keydown', handleGlobalKeys);
+    window.addEventListener('click', function(event) {
+        if (activeModal && event.target === activeModal) {
+            closeModal(activeModal);
+        }
+    });
     
-    function resizeAndDraw() {
+    function resizeAndDraw(forceDraw) {
         if(!c || !container) return;
 
         var viewport = window.visualViewport ? {
@@ -598,15 +608,12 @@ document.addEventListener('DOMContentLoaded', function() {
             height: window.innerHeight
         };
         
-        // Calculate available space
-        var header = document.querySelector('header');
         var headerHeight = header ? header.getBoundingClientRect().height : 0;
         
         // Find the currently visible controls grid to get accurate height
         var controlsHeight = 0;
-        var grids = document.querySelectorAll('.controls-grid');
-        for (var i = 0; i < grids.length; i++) {
-            var gridRect = grids[i].getBoundingClientRect();
+        for (var i = 0; i < controlGrids.length; i++) {
+            var gridRect = controlGrids[i].getBoundingClientRect();
             if (gridRect.height > 0) {
                 controlsHeight = gridRect.height;
                 break;
@@ -639,25 +646,38 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         newWidth = Math.max(80, newWidth);
         
-        // Update canvas size
-        c.width = Math.floor(newWidth);
-        c.height = Math.floor(newHeight);
+        var nextWidth = Math.floor(newWidth);
+        var nextHeight = Math.floor(newHeight);
+        if (!forceDraw && c.width === nextWidth && c.height === nextHeight) {
+            return;
+        }
+
+        c.width = nextWidth;
+        c.height = nextHeight;
         stickerSize = c.width / 5;
         
         drawCube();
     }
 
+    function scheduleResizeAndDraw() {
+        if (resizeFrame !== null) return;
+        resizeFrame = requestAnimationFrame(function() {
+            resizeFrame = null;
+            resizeAndDraw(false);
+        });
+    }
+
     // Initial draw
-    resizeAndDraw();
+    resizeAndDraw(true);
     
     // Resize listener
     window.addEventListener('resize', function() {
-        resizeAndDraw();
+        scheduleResizeAndDraw();
     });
 
     if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', function() {
-            resizeAndDraw();
+            scheduleResizeAndDraw();
         });
     }
     
@@ -703,15 +723,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Close modal if clicked outside content
-    if (modal) {
-        window.addEventListener('click', function(event) {
-            if (event.target == modal) {
-                closeModal(modal);
-            }
-        });
-    }
-
     // Inverse button logic
     var inverseBtn = document.getElementById("inverse-btn");
     var historyList = document.getElementById("move-history-list");
@@ -841,7 +852,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 layoutExtra.style.display = "none";
             }
             // Trigger resize to be safe, though grids should be same size
-            resizeAndDraw();
+            scheduleResizeAndDraw();
         });
     }
 
@@ -918,13 +929,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Close about modal on outside click (re-using window click listener logic would be messy, specific one here)
-    window.addEventListener('click', function(event) {
-        if (event.target == aboutModal) {
-            closeModal(aboutModal);
-        }
-    });
-
     // Easter Egg: Spin image on click
     var aboutImage = document.querySelector(".about-image");
     if (aboutImage) {
@@ -986,25 +990,33 @@ document.addEventListener('DOMContentLoaded', function() {
         'color-d': 4, 'color-l': 5, 'color-b': 6
     };
 
+    function scheduleColorUpdate() {
+        if (colorFrame === null) {
+            colorFrame = requestAnimationFrame(function() {
+                colorFrame = null;
+                drawCube();
+            });
+        }
+        clearTimeout(colorSaveTimer);
+        colorSaveTimer = setTimeout(saveSettings, 160);
+    }
+
+    function flushColorSettings() {
+        clearTimeout(colorSaveTimer);
+        saveSettings();
+    }
+
     Object.keys(colorMap).forEach(function(id) {
         var el = document.getElementById(id);
         if (el) {
             el.addEventListener('input', function(e) {
                 var colorIndex = colorMap[id];
                 CUBE_CONFIG.colors[colorIndex] = e.target.value;
-                saveSettings();
-                drawCube();
+                scheduleColorUpdate();
             });
+            el.addEventListener('change', flushColorSettings);
         }
     });
-
-    // Close settings on outside click
-    window.addEventListener('click', function(event) {
-        if (event.target == settingsModal) {
-            closeModal(settingsModal);
-        }
-    });
-
 
     // =========================================
     // Manual Scramble Logic
@@ -1068,13 +1080,6 @@ document.addEventListener('DOMContentLoaded', function() {
             closeModal(manualModal);
         });
     }
-
-    // Close manual modal on outside click
-    window.addEventListener('click', function(event) {
-        if (event.target == manualModal) {
-            closeModal(manualModal);
-        }
-    });
 
     if (manualConfirm) {
         manualConfirm.addEventListener('click', function() {
