@@ -318,6 +318,11 @@ function drawCube() {
     ctx.translate(offsetX, offsetY);
     renderQCube(ctx, scale, posit, palette);
     ctx.restore();
+
+    var status = document.getElementById("cube-status");
+    if (status) {
+        status.textContent = cube.isSolved() ? "Cube is solved." : "Cube state updated.";
+    }
 }
 
 // History log
@@ -427,9 +432,7 @@ function updateHistoryView() {
     if (countSpan) countSpan.textContent = "";
 
     if (!list) return;
-    list.innerHTML = "";
-    
-    var html = "";
+    list.replaceChildren();
     
     var optimizedHistory = optimizeMoves(moveHistory);
     var movesToDisplay = optimizedHistory; // Default to normal history
@@ -453,20 +456,23 @@ function updateHistoryView() {
     } else {
         // Normal View: Show scramble if exists
         if (currentScramble) {
-            html += '<div class="scramble-text">// ' + currentScramble + '</div>';
+            var scrambleText = document.createElement("div");
+            scrambleText.className = "scramble-text";
+            scrambleText.textContent = "// " + currentScramble;
+            list.appendChild(scrambleText);
         }
     }
     
     if (movesToDisplay.length > 0) {
-        html += '<span>' + movesToDisplay.join(" ") + '</span>';
+        var movesSpan = document.createElement("span");
+        movesSpan.textContent = movesToDisplay.join(" ");
+        list.appendChild(movesSpan);
     } else if (!currentScramble && !isShowingInverse) {
-        html = "(No moves yet)";
+        list.textContent = "(No moves yet)";
     } else if (isShowingInverse && movesToDisplay.length === 0 && optimizedHistory.length > 0) {
          // Should not happen if optimizedHistory > 0, but safe handling
-         html = "(Inverse is empty)";
+         list.textContent = "(Inverse is empty)";
     }
-
-    list.innerHTML = html;
 
     // Calculate Move Count (Exclude rotations x, y, z)
     var count = movesToDisplay.filter(function(m) {
@@ -482,6 +488,89 @@ function updateHistoryView() {
 document.addEventListener('DOMContentLoaded', function() {
     var c = document.getElementById("cube-canvas");
     var container = document.querySelector('.cube-container');
+    var activeModal = null;
+    var lastFocusedBeforeModal = null;
+    var focusableSelector = [
+        'a[href]',
+        'button:not([disabled])',
+        'input:not([disabled])',
+        'select:not([disabled])',
+        'textarea:not([disabled])',
+        '[tabindex]:not([tabindex="-1"])'
+    ].join(',');
+
+    function getFocusableElements(root) {
+        return Array.prototype.slice.call(root.querySelectorAll(focusableSelector))
+            .filter(function(el) {
+                return el.offsetParent !== null || el === document.activeElement;
+            });
+    }
+
+    function openModal(modalElement) {
+        if (!modalElement) return;
+        var opener = document.activeElement;
+        closeMenu();
+        if (sideMenu && sideMenu.contains(opener) && appMenuBtn) {
+            lastFocusedBeforeModal = appMenuBtn;
+        } else {
+            lastFocusedBeforeModal = opener;
+        }
+        activeModal = modalElement;
+        modalElement.style.display = "flex";
+        modalElement.setAttribute("aria-hidden", "false");
+
+        var focusable = getFocusableElements(modalElement);
+        if (focusable.length > 0) {
+            focusable[0].focus();
+        } else {
+            modalElement.setAttribute("tabindex", "-1");
+            modalElement.focus();
+        }
+    }
+
+    function closeModal(modalElement) {
+        if (!modalElement) return;
+        modalElement.style.display = "none";
+        modalElement.setAttribute("aria-hidden", "true");
+        if (activeModal === modalElement) {
+            activeModal = null;
+        }
+        if (lastFocusedBeforeModal && typeof lastFocusedBeforeModal.focus === "function") {
+            lastFocusedBeforeModal.focus();
+        }
+    }
+
+    function trapModalFocus(event) {
+        if (!activeModal || event.key !== "Tab") return;
+        var focusable = getFocusableElements(activeModal);
+        if (focusable.length === 0) {
+            event.preventDefault();
+            return;
+        }
+
+        var first = focusable[0];
+        var last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        }
+    }
+
+    function handleGlobalKeys(event) {
+        if (event.key === "Escape") {
+            if (activeModal) {
+                closeModal(activeModal);
+                return;
+            }
+            closeMenu();
+        }
+        trapModalFocus(event);
+    }
+
+    document.addEventListener('keydown', handleGlobalKeys);
     
     function resizeAndDraw() {
         if(!c || !container) return;
@@ -562,13 +651,13 @@ document.addEventListener('DOMContentLoaded', function() {
         solutionBtn.addEventListener('click', function() {
             isShowingInverse = false; // Always start with normal view
             updateHistoryView();
-            modal.style.display = "flex";
+            openModal(modal);
         });
     }
 
     if (closeBtn && modal) {
         closeBtn.addEventListener('click', function() {
-            modal.style.display = "none";
+            closeModal(modal);
         });
     }
     
@@ -576,7 +665,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (modal) {
         window.addEventListener('click', function(event) {
             if (event.target == modal) {
-                modal.style.display = "none";
+                closeModal(modal);
             }
         });
     }
@@ -692,7 +781,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Side Menu Logic
-    var appTitle = document.querySelector('.app-title');
+    var appMenuBtn = document.getElementById('app-menu-btn');
     var sideMenu = document.getElementById('side-menu');
     var menuOverlay = document.getElementById('menu-overlay');
 
@@ -703,9 +792,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isOpen) {
             sideMenu.classList.remove('open');
             menuOverlay.classList.remove('open');
+            sideMenu.setAttribute('aria-hidden', 'true');
+            if (appMenuBtn) appMenuBtn.setAttribute('aria-expanded', 'false');
         } else {
             sideMenu.classList.add('open');
             menuOverlay.classList.add('open');
+            sideMenu.setAttribute('aria-hidden', 'false');
+            if (appMenuBtn) appMenuBtn.setAttribute('aria-expanded', 'true');
+            var firstMenuItem = sideMenu.querySelector('.menu-item');
+            if (firstMenuItem) firstMenuItem.focus();
         }
     }
 
@@ -713,10 +808,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!sideMenu || !menuOverlay) return;
         sideMenu.classList.remove('open');
         menuOverlay.classList.remove('open');
+        sideMenu.setAttribute('aria-hidden', 'true');
+        if (appMenuBtn) appMenuBtn.setAttribute('aria-expanded', 'false');
     }
 
-    if (appTitle) {
-        appTitle.addEventListener('click', toggleMenu);
+    if (appMenuBtn) {
+        appMenuBtn.addEventListener('click', toggleMenu);
     }
 
     if (menuOverlay) {
@@ -747,19 +844,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function openAbout() {
         if (!aboutModal) return;
-        aboutModal.style.display = "flex";
+        openModal(aboutModal);
     }
 
     if (closeAboutBtn) {
         closeAboutBtn.addEventListener('click', function() {
-            aboutModal.style.display = "none";
+            closeModal(aboutModal);
         });
     }
 
     // Close about modal on outside click (re-using window click listener logic would be messy, specific one here)
     window.addEventListener('click', function(event) {
         if (event.target == aboutModal) {
-            aboutModal.style.display = "none";
+            closeModal(aboutModal);
         }
     });
 
@@ -792,12 +889,12 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('color-l').value = CUBE_CONFIG.colors[5];
         document.getElementById('color-b').value = CUBE_CONFIG.colors[6];
         
-        settingsModal.style.display = "flex";
+        openModal(settingsModal);
     }
 
     if (closeSettingsBtn) {
         closeSettingsBtn.addEventListener('click', function() {
-            settingsModal.style.display = "none";
+            closeModal(settingsModal);
         });
     }
 
@@ -839,7 +936,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Close settings on outside click
     window.addEventListener('click', function(event) {
         if (event.target == settingsModal) {
-            settingsModal.style.display = "none";
+            closeModal(settingsModal);
         }
     });
 
@@ -851,37 +948,97 @@ document.addEventListener('DOMContentLoaded', function() {
     var closeManualBtn = document.getElementById("close-manual-scramble");
     var manualInput = document.getElementById("manual-scramble-input");
     var manualConfirm = document.getElementById("manual-scramble-confirm");
+    var manualError = document.getElementById("manual-scramble-error");
+
+    function clearManualScrambleError() {
+        if (manualError) {
+            manualError.textContent = "";
+        }
+        if (manualInput) {
+            manualInput.removeAttribute("aria-invalid");
+        }
+    }
+
+    function setManualScrambleError(message) {
+        if (manualError) {
+            manualError.textContent = message;
+        }
+        if (manualInput) {
+            manualInput.setAttribute("aria-invalid", "true");
+            manualInput.focus();
+        }
+    }
+
+    function parseManualScramble(input) {
+        var trimmed = input.trim();
+        if (!trimmed) {
+            return { error: "Enter at least one move." };
+        }
+
+        var tokens = trimmed.split(/\s+/);
+        if (tokens.length > 80) {
+            return { error: "Use 80 moves or fewer." };
+        }
+
+        var validMove = /^[RUFBLDrufbldxyzEMS](2|')?$/;
+        for (var i = 0; i < tokens.length; i++) {
+            if (!validMove.test(tokens[i])) {
+                return { error: "Invalid move: " + tokens[i] };
+            }
+        }
+
+        return { moves: tokens };
+    }
 
     function openManualScramble() {
         if (!manualModal) return;
         manualInput.value = "";
-        manualModal.style.display = "flex";
+        clearManualScrambleError();
+        openModal(manualModal);
         setTimeout(function() { manualInput.focus(); }, 100);
     }
     
     if (closeManualBtn) {
         closeManualBtn.addEventListener('click', function() {
-            manualModal.style.display = "none";
+            closeModal(manualModal);
         });
     }
 
     // Close manual modal on outside click
     window.addEventListener('click', function(event) {
         if (event.target == manualModal) {
-            manualModal.style.display = "none";
+            closeModal(manualModal);
         }
     });
 
     if (manualConfirm) {
         manualConfirm.addEventListener('click', function() {
-            var moves = manualInput.value.trim();
-            if (moves) {
+            var result = parseManualScramble(manualInput.value);
+            if (result.error) {
+                setManualScrambleError(result.error);
+                return;
+            }
+
+            var moves = result.moves.join(" ");
+            try {
                 cube.doAlgorithm(moves);
                 currentScramble = moves;
                 moveHistory = []; // Reset user moves for new scramble
-                
-                manualModal.style.display = "none";
+                clearManualScrambleError();
+                closeModal(manualModal);
                 drawCube();
+            } catch (e) {
+                setManualScrambleError("That scramble could not be applied.");
+            }
+        });
+    }
+
+    if (manualInput) {
+        manualInput.addEventListener('input', clearManualScrambleError);
+        manualInput.addEventListener('keydown', function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                if (manualConfirm) manualConfirm.click();
             }
         });
     }
@@ -897,6 +1054,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Keyboard Support
     document.addEventListener('keydown', function(event) {
+        if (activeModal) return;
         // Ignore if typing in an input
         if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA") return;
         

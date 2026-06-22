@@ -7,21 +7,22 @@
 
 /* CSS Variables for easy theming */
 :root {
-    --bg-primary: #0a0a0a;
+    --bg-primary: #0b0b0a;
     --bg-secondary: #141414;
     --bg-tertiary: #1a1a1a;
     --bg-elevated: #222222;
     
-    --text-primary: #ffffff;
+    --text-primary: #f7f7f2;
     --text-secondary: #a0a0a0;
-    --text-muted: #666666;
+    --text-muted: #858585;
     
     --border-subtle: #2a2a2a;
     --border-medium: #3a3a3a;
     
-    --accent: #ffffff;
-    --accent-dim: rgba(255, 255, 255, 0.1);
-    --accent-hover: rgba(255, 255, 255, 0.05);
+    --accent: #f7f7f2;
+    --accent-dim: rgba(247, 247, 242, 0.1);
+    --accent-hover: rgba(247, 247, 242, 0.05);
+    --focus-ring: #9cc9ff;
     
     --transition-fast: 0.15s ease;
     --transition-normal: 0.25s ease;
@@ -40,7 +41,7 @@ html {
     overflow: hidden;
     width: 100%;
     height: 100%;
-    touch-action: none;
+    touch-action: manipulation;
 }
 
 * {
@@ -59,7 +60,7 @@ body {
     flex-direction: column;
     overflow: hidden;
     overscroll-behavior: none;
-    touch-action: none;
+    touch-action: manipulation;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -90,6 +91,21 @@ header {
     letter-spacing: 0.5px;
     color: var(--text-primary);
     text-transform: uppercase;
+    min-width: 0;
+}
+
+.title-btn {
+    appearance: none;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    letter-spacing: inherit;
+    padding: 6px 8px;
+    text-transform: inherit;
+    transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), opacity var(--transition-fast);
 }
 
 /* Icon Buttons */
@@ -103,7 +119,7 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all var(--transition-fast);
+    transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
 }
 
 .icon-btn:hover {
@@ -172,7 +188,7 @@ header {
     align-items: center;
     cursor: pointer;
     z-index: 50;
-    transition: all var(--transition-fast);
+    transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
     user-select: none;
     -webkit-tap-highlight-color: transparent;
 }
@@ -219,7 +235,7 @@ header {
     justify-content: center;
     align-items: center;
     user-select: none;
-    transition: all var(--transition-fast);
+    transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
 }
@@ -281,6 +297,7 @@ header {
 
 .close {
     color: var(--text-muted);
+    font-family: inherit;
     font-size: 24px;
     font-weight: 300;
     cursor: pointer;
@@ -289,10 +306,40 @@ header {
     right: 16px;
     padding: 8px;
     line-height: 1;
-    transition: color var(--transition-fast);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .close:hover {
+    color: var(--text-primary);
+    background-color: var(--accent-hover);
+    border-color: var(--border-subtle);
+}
+
+.solution-title-btn,
+.icon-inline-btn {
+    appearance: none;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    padding: 2px 4px;
+    transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.icon-inline-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.solution-title-btn:hover,
+.icon-inline-btn:hover {
+    background-color: var(--accent-hover);
     color: var(--text-primary);
 }
 
@@ -326,7 +373,7 @@ header {
     display: flex;
     align-items: center;
     color: var(--text-muted);
-    transition: all var(--transition-fast);
+    transition: color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
 }
 
 #copy-btn:hover {
@@ -456,7 +503,7 @@ header {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    transition: all var(--transition-normal);
+    transition: opacity var(--transition-normal), transform var(--transition-normal);
 }
 
 .side-menu.open {
@@ -476,7 +523,7 @@ header {
     text-align: left;
     cursor: pointer;
     border-radius: var(--radius-md);
-    transition: all var(--transition-fast);
+    transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
     width: 100%;
 }
 
@@ -600,11 +647,16 @@ header {
     border: 2px solid var(--text-secondary);
     border-radius: 4px;
     position: relative;
-    transition: all var(--transition-fast);
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .toggle-container:hover .checkmark {
     border-color: var(--text-primary);
+}
+
+.toggle-container input:focus-visible ~ .checkmark {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 3px;
 }
 
 .toggle-container input:checked ~ .checkmark {
@@ -656,8 +708,23 @@ header {
 }
 
 #manual-scramble-input:focus {
-    outline: none;
     border-color: var(--text-primary);
+}
+
+.field-help,
+.field-error {
+    font-size: 13px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.field-help {
+    color: var(--text-muted);
+}
+
+.field-error {
+    color: #ff8a8a;
+    min-height: 18px;
 }
 
 .action-btn {
@@ -731,7 +798,7 @@ header {
     font-weight: 700;
     margin: 0;
     color: var(--text-primary);
-    letter-spacing: -0.5px;
+    letter-spacing: 0;
 }
 
 .about-author {
@@ -759,7 +826,7 @@ header {
     font-size: 14px;
     font-weight: 600;
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
     /* Default dark button style if needed, but we use specific colors */
     background-color: var(--bg-elevated);
     color: var(--text-primary);
@@ -783,9 +850,9 @@ header {
 }
 
 .youtube-btn:hover {
-    background-color: white;
-    color: black;
-    border-color: white;
+    background-color: var(--text-primary);
+    color: var(--bg-primary);
+    border-color: var(--text-primary);
 }
 
 /* WCA Button */
@@ -796,9 +863,9 @@ header {
 }
 
 .wca-btn:hover {
-    background-color: white;
-    color: black;
-    border-color: white;
+    background-color: var(--text-primary);
+    color: var(--bg-primary);
+    border-color: var(--text-primary);
 }
 
 .wca-icon {
@@ -812,11 +879,56 @@ header {
     color: var(--text-primary);
     text-decoration: none;
     border-bottom: 1px solid var(--text-secondary);
-    transition: all var(--transition-fast);
+    transition: color var(--transition-fast), border-bottom-color var(--transition-fast);
 }
 
 .author-link:hover {
-    color: #ffffff;
-    border-bottom-color: #ffffff;
+    color: var(--text-primary);
+    border-bottom-color: var(--text-primary);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+.title-btn:focus-visible,
+.solution-title-btn:focus-visible,
+.icon-inline-btn:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 3px;
+}
+
+.grid-btn,
+.menu-item,
+.social-btn,
+.action-btn,
+.color-item,
+.label-text,
+#move-history-list,
+.scramble-text {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
 }
 
