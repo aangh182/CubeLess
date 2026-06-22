@@ -17,7 +17,7 @@ var CUBE_CONFIG = {
     },
     outline: {
         width: 1,
-        color: "#000000"
+        color: "#080a0b"
     },
     settings: {
         cancelSolution: true,
@@ -574,27 +574,41 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function resizeAndDraw() {
         if(!c || !container) return;
+
+        var viewport = window.visualViewport ? {
+            width: window.visualViewport.width,
+            height: window.visualViewport.height
+        } : {
+            width: window.innerWidth,
+            height: window.innerHeight
+        };
         
         // Calculate available space
-        var headerHeight = document.querySelector('header').offsetHeight;
+        var header = document.querySelector('header');
+        var headerHeight = header ? header.getBoundingClientRect().height : 0;
         
         // Find the currently visible controls grid to get accurate height
         var controlsHeight = 0;
         var grids = document.querySelectorAll('.controls-grid');
         for (var i = 0; i < grids.length; i++) {
-            if (grids[i].offsetHeight > 0) {
-                controlsHeight = grids[i].offsetHeight;
+            var gridRect = grids[i].getBoundingClientRect();
+            if (gridRect.height > 0) {
+                controlsHeight = gridRect.height;
                 break;
             }
         }
-        var availableHeight = window.innerHeight - headerHeight - controlsHeight - 40; // 40px padding/margin buffer
-        var availableWidth = window.innerWidth * 0.70;
+        var isShortLandscape = viewport.width > viewport.height && viewport.height <= 520;
+        var verticalBuffer = isShortLandscape ? 12 : 28;
+        var availableHeight = Math.max(96, viewport.height - headerHeight - controlsHeight - verticalBuffer);
+        var maxCanvasWidth = viewport.width >= 1024 ? 360 : (viewport.width >= 768 ? 320 : 280);
+        var widthRatio = isShortLandscape ? 0.50 : 0.78;
+        var availableWidth = Math.max(96, Math.min(viewport.width * widthRatio, maxCanvasWidth));
         
         // Desired Aspect Ratio: 5 width : 6 height
         // w / h = 5 / 6  => w = 5/6 * h
         
         // 1. Try limiting by width first
-        var newWidth = Math.min(availableWidth, 260); 
+        var newWidth = availableWidth;
         var newHeight = newWidth * (6/5);
         
         // 2. If height is too big, limit by height
@@ -602,6 +616,13 @@ document.addEventListener('DOMContentLoaded', function() {
             newHeight = availableHeight;
             newWidth = newHeight * (5/6);
         }
+
+        var minCanvasHeight = Math.min(isShortLandscape ? 96 : 116, availableHeight);
+        if (newHeight < minCanvasHeight) {
+            newHeight = minCanvasHeight;
+            newWidth = newHeight * (5/6);
+        }
+        newWidth = Math.max(80, newWidth);
         
         // Update canvas size
         c.width = Math.floor(newWidth);
@@ -618,6 +639,12 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('resize', function() {
         resizeAndDraw();
     });
+
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', function() {
+            resizeAndDraw();
+        });
+    }
     
     // Scramble button
     var scrambleBtn = document.getElementById("scramble-btn");
@@ -711,7 +738,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 navigator.clipboard.writeText(textToCopy).then(function() {
                     var original = solutionTitle.textContent;
                     solutionTitle.textContent = "Copied!";
-                    solutionTitle.style.color = "#2ecc71"; // Nice green
+                    solutionTitle.style.color = "var(--success)";
                     
                     setTimeout(function() {
                         solutionTitle.textContent = original;
