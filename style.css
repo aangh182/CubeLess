@@ -328,6 +328,24 @@ header {
     color: var(--text-secondary);
 }
 
+#solution-modal .modal-content {
+    padding: 20px;
+}
+
+#solution-heading {
+    gap: 6px;
+    margin-bottom: 8px;
+    padding-right: 40px;
+}
+
+#solution-count {
+    color: var(--text-muted);
+}
+
+#solution-heading .icon-inline-btn {
+    margin-left: auto;
+}
+
 .close {
     color: var(--text-muted);
     font-family: inherit;
@@ -351,7 +369,6 @@ header {
     border-color: var(--accent-border);
 }
 
-.solution-title-btn,
 .icon-inline-btn {
     appearance: none;
     background: transparent;
@@ -359,33 +376,65 @@ header {
     border-radius: var(--radius-sm);
     color: inherit;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     font: inherit;
     padding: 2px 4px;
     transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
-.icon-inline-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.solution-title-btn:hover,
 .icon-inline-btn:hover {
     background-color: var(--accent-hover);
     color: var(--accent-text);
 }
 
+.copy-status {
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.copy-status:empty {
+    display: none;
+}
+
+.copy-status:not(:empty) {
+    margin-bottom: 8px;
+}
+
 #move-history-list {
-    margin-top: 16px;
+    margin-top: 0;
+    padding: 8px 10px;
     word-wrap: break-word;
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
     font-family: 'SF Mono', 'Consolas', monospace;
     font-size: 14px;
-    line-height: 1.6;
+    line-height: 1.5;
     color: var(--text-primary);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+#move-history-list.copyable {
+    cursor: pointer;
+}
+
+#move-history-list.copyable:hover {
+    background-color: var(--accent-hover);
+    border-color: var(--accent-border);
+}
+
+#move-history-list.copyable:active {
+    background-color: var(--accent-dim);
+}
+
+#move-history-list.copied {
+    color: var(--success);
 }
 
 .scramble-text {
@@ -1024,8 +1073,8 @@ button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 .title-btn:focus-visible,
-.solution-title-btn:focus-visible,
-.icon-inline-btn:focus-visible {
+.icon-inline-btn:focus-visible,
+#move-history-list:focus-visible {
     outline: 2px solid var(--focus-ring);
     outline-offset: 3px;
 }

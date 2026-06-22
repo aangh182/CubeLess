@@ -421,13 +421,19 @@ function optimizeMoves(history) {
 
 function updateHistoryView() {
     var list = document.getElementById("move-history-list");
+    var copyStatus = document.getElementById("copy-status");
     
     // Reset count display immediately
     var countSpan = document.getElementById("solution-count");
     if (countSpan) countSpan.textContent = "";
+    if (copyStatus) copyStatus.textContent = "";
 
     if (!list) return;
     list.replaceChildren();
+    list.classList.remove("copyable", "copied");
+    list.setAttribute("aria-disabled", "true");
+    list.setAttribute("aria-label", "No moves to copy");
+    list.setAttribute("tabindex", "-1");
     
     var optimizedHistory = optimizeMoves(moveHistory);
     var movesToDisplay = optimizedHistory; // Default to normal history
@@ -463,10 +469,10 @@ function updateHistoryView() {
         movesSpan.textContent = movesToDisplay.join(" ");
         list.appendChild(movesSpan);
     } else if (!currentScramble && !isShowingInverse) {
-        list.textContent = "(No moves yet)";
+        list.textContent = "No moves recorded yet.";
     } else if (isShowingInverse && movesToDisplay.length === 0 && optimizedHistory.length > 0) {
          // Should not happen if optimizedHistory > 0, but safe handling
-         list.textContent = "(Inverse is empty)";
+         list.textContent = "There are no inverse moves to show.";
     }
 
     // Calculate Move Count (Exclude rotations x, y, z)
@@ -475,7 +481,21 @@ function updateHistoryView() {
     }).length;
 
     if (countSpan) {
-        countSpan.textContent = count > 0 ? " (" + count + ")" : "";
+        countSpan.textContent = " (" + count + ")";
+    }
+
+    if (movesToDisplay.length > 0) {
+        list.classList.add("copyable");
+        list.removeAttribute("aria-disabled");
+        list.setAttribute("aria-label", "Copy displayed moves");
+        list.setAttribute("tabindex", "0");
+    }
+
+    var inverseButton = document.getElementById("inverse-btn");
+    if (inverseButton) {
+        var inverseLabel = isShowingInverse ? "Show original moves" : "Show inverse moves";
+        inverseButton.title = inverseLabel;
+        inverseButton.setAttribute("aria-label", inverseLabel);
     }
 }
 
@@ -714,31 +734,55 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Solution Title Copy Logic
-    var solutionTitle = document.getElementById("solution-title");
-    if (solutionTitle) {
-        solutionTitle.addEventListener("click", function() {
-            var list = document.getElementById("move-history-list");
-            if (!list) return;
+    // Move Text Copy Logic
+    var copyableHistoryList = document.getElementById("move-history-list");
+    var copyStatus = document.getElementById("copy-status");
+    function setCopyStatus(message) {
+        if (copyStatus) {
+            copyStatus.textContent = message;
+        }
+    }
 
-            // Extract text from the span (this contains just the moves, not the scramble div)
-            var textToCopy = "";
-            var movesSpan = list.querySelector("span");
-            if (movesSpan) {
-                textToCopy = movesSpan.textContent;
-            }
-            
-            if (textToCopy) {
-                navigator.clipboard.writeText(textToCopy).then(function() {
-                    var original = solutionTitle.textContent;
-                    solutionTitle.textContent = "Copied!";
-                    solutionTitle.style.color = "var(--success)";
-                    
-                    setTimeout(function() {
-                        solutionTitle.textContent = original;
-                        solutionTitle.style.color = "";
-                    }, 1000);
-                });
+    function copyDisplayedMoves() {
+        var list = document.getElementById("move-history-list");
+        if (!list) return;
+
+        // Extract text from the span (this contains just the moves, not the scramble div)
+        var textToCopy = "";
+        var movesSpan = list.querySelector("span");
+        if (movesSpan) {
+            textToCopy = movesSpan.textContent;
+        }
+
+        if (!textToCopy) {
+            setCopyStatus("No moves to copy yet.");
+            return;
+        }
+
+        if (!navigator.clipboard || !navigator.clipboard.writeText) {
+            setCopyStatus("Copy is not available in this browser. Select the moves and copy them manually.");
+            return;
+        }
+
+        navigator.clipboard.writeText(textToCopy).then(function() {
+            list.classList.add("copied");
+            setCopyStatus("Moves copied.");
+
+            setTimeout(function() {
+                list.classList.remove("copied");
+                setCopyStatus("");
+            }, 1200);
+        }).catch(function() {
+            setCopyStatus("Copy failed. Select the moves and copy them manually.");
+        });
+    }
+
+    if (copyableHistoryList) {
+        copyableHistoryList.addEventListener("click", copyDisplayedMoves);
+        copyableHistoryList.addEventListener("keydown", function(event) {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                copyDisplayedMoves();
             }
         });
     }

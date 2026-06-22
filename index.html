@@ -43,8 +43,9 @@
     <div id="solution-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="solution-heading" aria-hidden="true" style="display: none;">
         <div class="modal-content">
             <button id="close-modal" class="close" type="button" aria-label="Close solution dialog">&times;</button>
-            <h2 id="solution-heading"><button id="solution-title" class="solution-title-btn" type="button" title="Click to copy moves">Solution</button> <span id="solution-count" aria-live="polite"></span> <button id="inverse-btn" class="icon-inline-btn" type="button" title="Inverse Solution" aria-label="Show inverse solution"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg></button></h2>
-            <div id="move-history-list" aria-live="polite"></div>
+            <h2 id="solution-heading"><span>Solution</span><span id="solution-count" aria-live="polite"></span> <button id="inverse-btn" class="icon-inline-btn" type="button" title="Show inverse moves" aria-label="Show inverse moves"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg></button></h2>
+            <p id="copy-status" class="copy-status" aria-live="polite"></p>
+            <div id="move-history-list" aria-live="polite" role="button" tabindex="-1" aria-label="No moves to copy"></div>
         </div>
     </div>
 
