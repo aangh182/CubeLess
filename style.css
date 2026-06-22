@@ -2,9 +2,6 @@
    CubeLess - Minimalist Monochrome Style
    ========================================= */
 
-/* Google Font Import */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap');
-
 /* CSS Variables for easy theming */
 :root {
     --bg-primary: oklch(13% 0.01 218);
@@ -27,11 +24,9 @@
     --accent-hover: oklch(76% 0.13 205 / 0.09);
     --accent-border: oklch(76% 0.13 205 / 0.42);
     --success: oklch(73% 0.14 154);
-    --success-dim: oklch(73% 0.14 154 / 0.14);
     --danger: oklch(68% 0.18 25);
     --danger-dim: oklch(68% 0.18 25 / 0.16);
     --danger-border: oklch(68% 0.18 25 / 0.55);
-    --warning: oklch(78% 0.15 78);
     --focus-ring: var(--accent);
     
     --transition-fast: 0.15s ease;
@@ -130,6 +125,10 @@ header {
     background-color: var(--accent-hover);
     border-color: var(--accent-border);
     color: var(--accent-text);
+}
+
+.title-btn:active {
+    opacity: 0.72;
 }
 
 /* Icon Buttons */
@@ -397,28 +396,6 @@ header {
     display: block;
 }
 
-#copy-btn {
-    background: transparent;
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    font-size: 14px;
-    padding: 6px 8px;
-    display: flex;
-    align-items: center;
-    color: var(--text-muted);
-    transition: color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
-}
-
-#copy-btn:hover {
-    border-color: var(--border-medium);
-    color: var(--text-primary);
-}
-
-#copy-btn:active {
-    transform: scale(0.95);
-}
-
 /* =========================================
    Scrollbar Styling (for modal)
    ========================================= */
@@ -622,16 +599,6 @@ header {
 /* =========================================
    Side Menu
    ========================================= */
-.app-title {
-    cursor: pointer;
-    user-select: none;
-    transition: opacity var(--transition-fast);
-}
-
-.app-title:active {
-    opacity: 0.7;
-}
-
 .side-menu {
     position: fixed;
     top: 50%;

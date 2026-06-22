@@ -53,9 +53,7 @@ function loadSettings() {
                  }
             }
         }
-    } catch (e) {
-        console.error("Error loading settings:", e);
-    }
+    } catch (e) {}
 }
 
 function saveSettings() {
@@ -64,9 +62,7 @@ function saveSettings() {
             colors: CUBE_CONFIG.colors,
             settings: CUBE_CONFIG.settings
         }));
-    } catch (e) {
-        console.error("Error saving settings:", e);
-    }
+    } catch (e) {}
 }
 
 // Load immediately on startup
@@ -81,7 +77,6 @@ function RubiksCube() {
             Cube.initSolver();
         }
     } else {
-        console.error("Cube library not found! Please ensure cube.js and solve.js are loaded.");
         // Mock fallback to prevent crashes
         this.cube = {
             asString: function() { return "UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB"; },
@@ -700,7 +695,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inverse button logic
     var inverseBtn = document.getElementById("inverse-btn");
     var historyList = document.getElementById("move-history-list");
-    var countSpan = document.getElementById("solution-count");
 
     if (inverseBtn && historyList) {
         inverseBtn.addEventListener("click", function() {
