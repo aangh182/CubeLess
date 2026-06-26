@@ -54,6 +54,7 @@ html {
     height: 100%;
     min-height: 100%;
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 * {
@@ -74,6 +75,7 @@ body {
     overflow: hidden;
     overscroll-behavior: none;
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -840,6 +842,10 @@ header {
     min-height: 18px;
 }
 
+.field-error:empty {
+    display: none;
+}
+
 .action-btn {
     width: 100%;
     padding: 12px;
@@ -1023,6 +1029,83 @@ input:focus-visible,
 #move-history-list:focus-visible {
     outline: 2px solid var(--focus-ring);
     outline-offset: 3px;
+}
+
+@media (hover: none) and (pointer: coarse) {
+    .title-btn:hover {
+        background-color: transparent;
+        border-color: transparent;
+        color: inherit;
+    }
+
+    .icon-btn:hover {
+        background-color: transparent;
+        border-color: transparent;
+        color: var(--text-muted);
+    }
+
+    #record-btn.recording:hover {
+        color: var(--danger);
+        background-color: var(--danger-dim);
+        border-color: var(--danger-border);
+    }
+
+    #layout-btn:hover {
+        background-color: var(--key-surface);
+        border-color: var(--key-border);
+        color: var(--text-muted);
+    }
+
+    .grid-btn:hover {
+        background-color: var(--key-surface);
+        border-color: var(--key-border);
+        color: var(--key-text);
+    }
+
+    .close:hover,
+    .icon-inline-btn:hover {
+        background-color: transparent;
+        border-color: transparent;
+        color: var(--text-muted);
+    }
+
+    .menu-item:hover {
+        background-color: transparent;
+        border-color: var(--border-subtle);
+        color: var(--text-secondary);
+    }
+
+    .action-btn:hover {
+        background-color: var(--bg-elevated);
+        border-color: var(--border-medium);
+        color: var(--text-primary);
+    }
+
+    #move-history-list.copyable:hover {
+        background-color: transparent;
+        border-color: transparent;
+    }
+
+    .social-btn:hover,
+    .youtube-btn:hover,
+    .wca-btn:hover {
+        background-color: var(--bg-elevated);
+        border-color: var(--border-subtle);
+        color: var(--text-secondary);
+    }
+
+    .toggle-container:hover .checkmark {
+        border-color: var(--border-medium);
+    }
+
+    .author-link:hover {
+        color: var(--accent-text);
+        border-bottom-color: var(--accent-border);
+    }
+
+    .modal-content::-webkit-scrollbar-thumb:hover {
+        background: var(--border-medium);
+    }
 }
 
 .grid-btn,

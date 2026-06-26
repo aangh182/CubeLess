@@ -659,6 +659,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    function releaseTapFocus(event) {
+        if (!event.target || !event.target.closest) return;
+        var control = event.target.closest('button, a, #move-history-list.copyable');
+        if (!control || typeof control.blur !== "function") return;
+        window.setTimeout(function() {
+            if (document.activeElement === control) {
+                control.blur();
+            }
+        }, 0);
+    }
+
+    document.addEventListener('pointerup', function(event) {
+        if (event.pointerType !== "mouse") {
+            releaseTapFocus(event);
+        }
+    }, true);
+
+    document.addEventListener('touchend', releaseTapFocus, true);
+
     // Initial draw
     resizeAndDraw(true);
     
