@@ -42,11 +42,6 @@ function loadSettings() {
         var saved = localStorage.getItem('cubeless_settings');
         if (saved) {
             var parsed = JSON.parse(saved);
-            if (parsed.colors) {
-                 for (var key in parsed.colors) {
-                     CUBE_CONFIG.colors[key] = parsed.colors[key];
-                 }
-            }
             if (parsed.settings) {
                  for (var key in parsed.settings) {
                      CUBE_CONFIG.settings[key] = parsed.settings[key];
@@ -59,7 +54,6 @@ function loadSettings() {
 function saveSettings() {
     try {
         localStorage.setItem('cubeless_settings', JSON.stringify({
-            colors: CUBE_CONFIG.colors,
             settings: CUBE_CONFIG.settings
         }));
     } catch (e) {}
@@ -506,8 +500,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var header = document.querySelector('header');
     var controlGrids = document.querySelectorAll('.controls-grid');
     var resizeFrame = null;
-    var colorFrame = null;
-    var colorSaveTimer = null;
     var activeModal = null;
     var lastFocusedBeforeModal = null;
     var focusableSelector = [
@@ -950,14 +942,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('setting-cancel-solution').checked = CUBE_CONFIG.settings.cancelSolution;
         document.getElementById('setting-manual-scramble').checked = CUBE_CONFIG.settings.manualScramble;
         
-        // Sync colors
-        document.getElementById('color-u').value = CUBE_CONFIG.colors[1];
-        document.getElementById('color-r').value = CUBE_CONFIG.colors[2];
-        document.getElementById('color-f').value = CUBE_CONFIG.colors[3];
-        document.getElementById('color-d').value = CUBE_CONFIG.colors[4];
-        document.getElementById('color-l').value = CUBE_CONFIG.colors[5];
-        document.getElementById('color-b').value = CUBE_CONFIG.colors[6];
-        
         openModal(settingsModal);
     }
 
@@ -983,40 +967,6 @@ document.addEventListener('DOMContentLoaded', function() {
             saveSettings();
         });
     }
-
-    // Color Pickers Listeners
-    var colorMap = {
-        'color-u': 1, 'color-r': 2, 'color-f': 3,
-        'color-d': 4, 'color-l': 5, 'color-b': 6
-    };
-
-    function scheduleColorUpdate() {
-        if (colorFrame === null) {
-            colorFrame = requestAnimationFrame(function() {
-                colorFrame = null;
-                drawCube();
-            });
-        }
-        clearTimeout(colorSaveTimer);
-        colorSaveTimer = setTimeout(saveSettings, 160);
-    }
-
-    function flushColorSettings() {
-        clearTimeout(colorSaveTimer);
-        saveSettings();
-    }
-
-    Object.keys(colorMap).forEach(function(id) {
-        var el = document.getElementById(id);
-        if (el) {
-            el.addEventListener('input', function(e) {
-                var colorIndex = colorMap[id];
-                CUBE_CONFIG.colors[colorIndex] = e.target.value;
-                scheduleColorUpdate();
-            });
-            el.addEventListener('change', flushColorSettings);
-        }
-    });
 
     // =========================================
     // Manual Scramble Logic
