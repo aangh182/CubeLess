@@ -5,6 +5,11 @@
  */
 
 
+var DEFAULT_SETTINGS = {
+    cancelSolution: true,
+    manualScramble: false
+};
+
 // Configuration for Cube appearance (Colors, Outline, etc.)
 var CUBE_CONFIG = {
     colors: {
@@ -19,10 +24,7 @@ var CUBE_CONFIG = {
         width: 1,
         color: "#080a0b"
     },
-    settings: {
-        cancelSolution: true,
-        manualScramble: false
-    }
+    settings: Object.assign({}, DEFAULT_SETTINGS)
 };
 
 // Keyboard Layouts
@@ -43,9 +45,7 @@ function loadSettings() {
         if (saved) {
             var parsed = JSON.parse(saved);
             if (parsed.settings) {
-                 for (var key in parsed.settings) {
-                     CUBE_CONFIG.settings[key] = parsed.settings[key];
-                 }
+                CUBE_CONFIG.settings = Object.assign({}, DEFAULT_SETTINGS, parsed.settings);
             }
         }
     } catch (e) {}
